@@ -23,8 +23,8 @@ jobs:
       - name: Deploy via SSH
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            cd /var/www/upwork-tracker-app
-            git pull origin main
+            cd /var/www/projects.oussema-sferi.dev/upwork-tracker-app
+            git pull origin main || git clone git@github.com:oussema-sferi/upwork-tracker-app.git .
             docker compose down
             docker compose up -d --build
           EOF
