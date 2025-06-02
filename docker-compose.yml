@@ -4,7 +4,7 @@ services:
     build:
       context: ./docker/php
     environment:
-      APP_ENV: prod
+      APP_ENV: dev
     volumes:
       - .:/var/www/symfony
     working_dir: /var/www/symfony
