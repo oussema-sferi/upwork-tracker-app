@@ -2,6 +2,9 @@ version: '3.8'
 
 services:
   php:
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: 0
     build:
       context: .
       dockerfile: Dockerfile

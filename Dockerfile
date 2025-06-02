@@ -17,7 +17,11 @@ COPY . .
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Install PHP dependencies
+# Set environment to production
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
+# Install PHP dependencies in production mode
 RUN composer install --no-dev --optimize-autoloader
 
 # Permissions (optional tweak)
