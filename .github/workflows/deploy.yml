@@ -25,8 +25,14 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          key: ${{ secrets.DIGITAL_OCEAN_VPS_SSH_KEY }}
           script: |
             cd /var/www/upwork-tracker.oussema-sferi.dev
             docker compose down
             docker compose up -d --build
+            
+            # Run composer inside the PHP container
+            docker compose exec php composer install --no-dev --optimize-autoloader
+
+            # Clear Symfony cache inside the PHP container
+            docker compose exec php php bin/console cache:clear
