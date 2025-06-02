@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: upwork-tracker-php
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: upwork-tracker-nginx
+    ports:
+      - "8080:80" # Optional for debugging
+    volumes:
+      - ./docker/nginx:/etc/nginx/conf.d
+      - .:/var/www/html
+    depends_on:
+      - php
+
+  mysql:
+    image: mysql:8.0
+    container_name: upwork-tracker-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: symfony
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

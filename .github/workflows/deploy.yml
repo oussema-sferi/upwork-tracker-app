@@ -20,11 +20,25 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy via SSH
+      - name: Deploy via SSH and Docker
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            cd /var/www/projects.oussema-sferi.dev/upwork-tracker-app
-            git pull origin main || git clone git@github.com:oussema-sferi/upwork-tracker-app.git .
-            docker compose down
-            docker compose up -d --build
+            set -e
+
+            # Go to project directory or clone if not exists
+            cd /var/www/projects.oussema-sferi.dev/upwork-tracker-app || {
+              mkdir -p /var/www/projects.oussema-sferi.dev/upwork-tracker-app
+              cd /var/www/projects.oussema-sferi.dev/upwork-tracker-app
+              git clone git@github.com:oussema-sferi/upwork-tracker-app.git .
+            }
+
+            # Pull latest changes
+            git pull origin main
+
+            # Deploy with Docker Compose (production config)
+            docker compose -f docker-compose.prod.yaml down
+            docker compose -f docker-compose.prod.yaml up -d --build
+
+            # Optional: remove unused images
+            docker image prune -f
           EOF
