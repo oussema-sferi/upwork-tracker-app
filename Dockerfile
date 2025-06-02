@@ -1,28 +1,14 @@
-# Dockerfile
 FROM php:8.3-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git curl libicu-dev libzip-dev zip unzip \
-    libpng-dev libjpeg-dev libfreetype6-dev libonig-dev \
-    libxml2-dev && \
-    docker-php-ext-install intl pdo pdo_mysql zip gd opcache dom xml
+    libzip-dev zip unzip git curl \
+    libonig-dev libxml2-dev libpng-dev libicu-dev libpq-dev libssl-dev
 
-# Set working directory
-WORKDIR /var/www/symfony
-
-# Copy application files
-COPY . .
+# Install PHP extensions needed for Symfony
+RUN docker-php-ext-install pdo pdo_mysql zip intl opcache
 
 # Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set environment to production
-ENV APP_ENV=prod
-ENV APP_DEBUG=0
-
-# Install PHP dependencies in production mode
-RUN composer install --no-dev --optimize-autoloader
-
-# Permissions (optional tweak)
-RUN chown -R www-data:www-data /var/www/symfony
+WORKDIR /var/www/symfony

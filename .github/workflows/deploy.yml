@@ -2,43 +2,31 @@ name: Deploy to VPS
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DIGITAL_OCEAN_VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+      - name: Copy files to VPS
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.DIGITAL_OCEAN_VPS_SSH_KEY }}
+          source: "."
+          target: "/var/www/upwork-tracker.oussema-sferi.dev"
 
-      - name: Deploy via SSH and Docker
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            set -e
-
-            # Go to project directory or clone if not exists
-            cd /var/www/projects.oussema-sferi.dev/upwork-tracker-app || {
-              mkdir -p /var/www/projects.oussema-sferi.dev/upwork-tracker-app
-              cd /var/www/projects.oussema-sferi.dev/upwork-tracker-app
-              git clone git@github.com:oussema-sferi/upwork-tracker-app.git .
-            }
-
-            # Pull latest changes
-            git pull origin main
-
-            # Deploy with Docker Compose (production config)
-            docker compose -f docker-compose.prod.yaml down
-            docker compose -f docker-compose.prod.yaml up -d --build
-
-            # Optional: remove unused images
-            docker image prune -f
-          EOF
+      - name: SSH Build & Restart
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /var/www/upwork-tracker.oussema-sferi.dev
+            docker compose down
+            docker compose up -d --build
