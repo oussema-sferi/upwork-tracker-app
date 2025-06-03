@@ -4,7 +4,7 @@ services:
     build:
       context: ./docker/php
     environment:
-      APP_ENV: prod
+      APP_ENV: dev
     volumes:
       - .:/var/www/symfony
     working_dir: /var/www/symfony
@@ -23,11 +23,14 @@ services:
 
   mysql:
     image: mysql:8.0
+    container_name: upwork-tracker-mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: symfony
-      MYSQL_USER: symfony
-      MYSQL_PASSWORD: symfony
+      MYSQL_DATABASE: upwork-tracker
+      MYSQL_USER: upwork-tracker
+      MYSQL_PASSWORD: 12345678
+    ports:
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
 
