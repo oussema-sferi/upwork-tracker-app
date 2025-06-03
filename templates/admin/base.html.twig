@@ -36,10 +36,15 @@
         {% include 'admin/_sidebar.html.twig' %}
         <!-- partial -->
 
+        <div class="main-panel">
 
-        {% block body %}
+            {% block body %}
 
-        {% endblock %}
+            {% endblock %}
+
+        {% include 'admin/_footer.html.twig' %}
+        <!-- partial -->
+        </div>
         <!-- main-panel ends -->
     </div>
     <!-- page-body-wrapper ends -->
