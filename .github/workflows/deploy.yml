@@ -33,6 +33,15 @@ jobs:
             
             # Run composer inside the PHP container
             docker compose exec php composer install --no-dev --optimize-autoloader
+            
+            # Ensure the database exists
+            docker compose exec php php bin/console doctrine:database:create --if-not-exists --env=prod
+
+            # Directly update the schema (force)
+            docker compose exec php php bin/console doctrine:schema:update --force --env=prod
+
+            # Clear cache
+            docker compose exec php php bin/console cache:clear --env=prod
 
             # Clear Symfony cache inside the PHP container
             docker compose exec php php bin/console cache:clear --env=prod
