@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Admin{% endblock %}</title>
+
+    <link href="{{ asset('admin/vendors/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('admin/css/style.css') }}" rel="stylesheet">
+    {# Add other vendor CSS here if needed #}
+</head>
+<body>
+{% block body %}{% endblock %}
+
+<script src="{{ asset('admin/vendors/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('admin/js/main.js') }}"></script>
+{# Add other vendor JS here if needed #}
+</body>
+</html>
