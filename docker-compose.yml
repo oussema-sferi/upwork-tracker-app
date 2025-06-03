@@ -3,8 +3,6 @@ services:
   php:
     build:
       context: ./docker/php
-    environment:
-      APP_ENV: prod
     volumes:
       - .:/var/www/symfony
     working_dir: /var/www/symfony
