@@ -41,7 +41,7 @@ services:
     image: phpmyadmin/phpmyadmin
     container_name: staging-upwork-tracker-phpmyadmin
     ports:
-      - "8084:80"
+      - "9000:80"
     environment:
       PMA_HOST: mysql
       PMA_ARBITRARY: 1

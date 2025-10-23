@@ -48,7 +48,7 @@ services:
     image: phpmyadmin/phpmyadmin
     container_name: upwork-tracker-phpmyadmin
     ports:
-      - "8082:80"
+      - "9001:80"
     environment:
       PMA_HOST: mysql
       PMA_ARBITRARY: 1
