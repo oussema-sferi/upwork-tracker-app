@@ -1,0 +1,65 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, zip, opcache
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Run tests
+        run: php bin/phpunit
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /var/www/staging-upwork-tracker-app
+            
+            # Pull latest code
+            git fetch origin develop
+            git reset --hard origin/develop
+            
+            # Stop existing containers
+            docker-compose down || true
+            
+            # Build and start containers
+            docker-compose up -d --build
+            
+            # Install dependencies
+            docker-compose exec -T php composer install --no-dev --optimize-autoloader
+            
+            # Create database if not exists
+            docker-compose exec -T php php bin/console doctrine:database:create --if-not-exists --env=prod
+            
+            # Run migrations
+            docker-compose exec -T php php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+            
+            # Clear cache
+            docker-compose exec -T php php bin/console cache:clear --env=prod
