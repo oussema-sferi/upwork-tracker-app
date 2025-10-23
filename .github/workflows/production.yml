@@ -47,19 +47,19 @@ jobs:
             git reset --hard origin/main
             
             # Stop existing containers
-            docker-compose down || true
+            docker-compose -f docker-compose.prod.yaml down || true
             
             # Build and start containers
-            docker-compose up -d --build
+            docker-compose -f docker-compose.prod.yaml up -d --build
             
             # Install dependencies
-            docker-compose exec -T php composer install --no-dev --optimize-autoloader
+            docker-compose -f docker-compose.prod.yaml exec -T php composer install --no-dev --optimize-autoloader
             
             # Create database if not exists
-            docker-compose exec -T php php bin/console doctrine:database:create --if-not-exists --env=prod
+            docker-compose -f docker-compose.prod.yaml exec -T php php bin/console doctrine:database:create --if-not-exists --env=prod
             
             # Run migrations
-            docker-compose exec -T php php bin/console doctrine:migrations:migrate --no-interaction --env=prod
+            docker-compose -f docker-compose.prod.yaml exec -T php php bin/console doctrine:migrations:migrate --no-interaction --env=prod
             
             # Clear cache
-            docker-compose exec -T php php bin/console cache:clear --env=prod
+            docker-compose -f docker-compose.prod.yaml exec -T php php bin/console cache:clear --env=prod
