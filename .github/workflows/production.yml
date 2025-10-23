@@ -30,6 +30,16 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Copy files to VPS
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "."
+          target: "/var/www/upwork-tracker-app"
+          rm: true
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -38,10 +48,6 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /var/www/upwork-tracker-app
-            
-            # Pull latest code (faster than SCP)
-            git fetch origin main
-            git reset --hard origin/main
             
             # Set environment variables
             export MYSQL_PASSWORD=12345678
