@@ -46,20 +46,26 @@ jobs:
             git fetch origin develop
             git reset --hard origin/develop
             
+            # Set environment variables
+            export MYSQL_PASSWORD=12345678
+            
             # Stop existing containers
             docker-compose -f docker-compose.staging.yml down || true
             
             # Build and start containers
             docker-compose -f docker-compose.staging.yml up -d --build
             
+            # Wait for services to be ready
+            sleep 10
+            
             # Install dependencies
-            docker-compose -f docker-compose.staging.yml exec -T php composer install --no-dev --optimize-autoloader
+            docker-compose -f docker-compose.staging.yml exec -T php composer install --no-dev --optimize-autoloader --no-interaction
             
             # Create database if not exists
-            docker-compose -f docker-compose.staging.yml exec -T php php bin/console doctrine:database:create --if-not-exists --env=prod
+            docker-compose -f docker-compose.staging.yml exec -T php php bin/console doctrine:database:create --if-not-exists --env=prod --no-interaction
             
             # Run migrations
             docker-compose -f docker-compose.staging.yml exec -T php php bin/console doctrine:migrations:migrate --no-interaction --env=prod
             
             # Clear cache
-            docker-compose -f docker-compose.staging.yml exec -T php php bin/console cache:clear --env=prod
+            docker-compose -f docker-compose.staging.yml exec -T php php bin/console cache:clear --env=prod --no-interaction
