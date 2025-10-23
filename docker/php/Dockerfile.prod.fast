@@ -1,0 +1,21 @@
+# Ultra-fast production Dockerfile using pre-built images
+FROM php:8.3-fpm
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/symfony
+
+# Create non-root user for security
+RUN groupadd -g 1000 www && \
+    useradd -u 1000 -ms /bin/bash -g www www
+
+# Copy application files
+COPY --chown=www:www . /var/www/symfony
+
+# Switch to non-root user
+USER www
+
+# Expose port 9000 for PHP-FPM
+EXPOSE 9000

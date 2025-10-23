@@ -4,7 +4,10 @@ services:
   php:
     build:
       context: ./docker/php
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile.prod.fast
+      cache_from:
+        - php:8.3-fpm
+        - composer:latest
     container_name: upwork-tracker-php
     volumes:
       - .:/var/www/symfony
