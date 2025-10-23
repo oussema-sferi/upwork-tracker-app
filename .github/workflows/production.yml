@@ -30,9 +30,6 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -42,24 +39,30 @@ jobs:
           script: |
             cd /var/www/upwork-tracker-app
             
-            # Pull latest code
+            # Pull latest code (faster than SCP)
             git fetch origin main
             git reset --hard origin/main
+            
+            # Set environment variables
+            export MYSQL_PASSWORD=12345678
             
             # Stop existing containers
             docker-compose -f docker-compose.prod.yaml down || true
             
-            # Build and start containers
+            # Build and start containers (with build cache)
             docker-compose -f docker-compose.prod.yaml up -d --build
             
-            # Install dependencies
-            docker-compose -f docker-compose.prod.yaml exec -T php composer install --no-dev --optimize-autoloader
+            # Wait for services to be ready
+            sleep 10
+            
+            # Install dependencies (only if composer.lock changed)
+            docker-compose -f docker-compose.prod.yaml exec -T php composer install --no-dev --optimize-autoloader --no-interaction
             
             # Create database if not exists
-            docker-compose -f docker-compose.prod.yaml exec -T php php bin/console doctrine:database:create --if-not-exists --env=prod
+            docker-compose -f docker-compose.prod.yaml exec -T php php bin/console doctrine:database:create --if-not-exists --env=prod --no-interaction
             
             # Run migrations
             docker-compose -f docker-compose.prod.yaml exec -T php php bin/console doctrine:migrations:migrate --no-interaction --env=prod
             
             # Clear cache
-            docker-compose -f docker-compose.prod.yaml exec -T php php bin/console cache:clear --env=prod
+            docker-compose -f docker-compose.prod.yaml exec -T php php bin/console cache:clear --env=prod --no-interaction
