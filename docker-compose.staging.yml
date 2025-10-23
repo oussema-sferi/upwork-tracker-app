@@ -2,7 +2,7 @@ services:
   php:
     build:
       context: ./docker/php
-      dockerfile: Dockerfile.prod.fast
+      dockerfile: Dockerfile
     volumes:
       - .:/var/www/symfony
     working_dir: /var/www/symfony

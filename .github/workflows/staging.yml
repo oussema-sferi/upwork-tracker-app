@@ -58,8 +58,8 @@ jobs:
             # Wait for services to be ready
             sleep 10
             
-            # Install dependencies
-            docker-compose -f docker-compose.staging.yml exec -T php composer install --no-dev --optimize-autoloader --no-interaction
+            # Install dependencies (including dev dependencies for staging)
+            docker-compose -f docker-compose.staging.yml exec -T php composer install --optimize-autoloader --no-interaction
             
             # Create database if not exists
             docker-compose -f docker-compose.staging.yml exec -T php php bin/console doctrine:database:create --if-not-exists --env=dev --no-interaction
