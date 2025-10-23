@@ -37,5 +37,16 @@ services:
       - staging_mysql_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: staging-upwork-tracker-phpmyadmin
+    ports:
+      - "8082:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_ARBITRARY: 1
+    depends_on:
+      - mysql
+
 volumes:
   staging_mysql_data:
