@@ -8,8 +8,8 @@ services:
     working_dir: /var/www/symfony
     environment:
       - DATABASE_URL=mysql://upwork-tracker:12345678@staging-upwork-tracker-mysql:3306/upwork_tracker_staging
-      - APP_ENV=prod
-      - APP_DEBUG=0
+      - APP_ENV=dev
+      - APP_DEBUG=1
     depends_on:
       - mysql
 
