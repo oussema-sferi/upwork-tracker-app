@@ -7,7 +7,7 @@ services:
       - .:/var/www/symfony
     working_dir: /var/www/symfony
     environment:
-      - DATABASE_URL=mysql://upwork-tracker:12345678@staging-upwork-tracker-mysql:3306/upwork-tracker
+      - DATABASE_URL=mysql://upwork-tracker:12345678@staging-upwork-tracker-mysql:3306/upwork_tracker_staging
       - APP_ENV=prod
       - APP_DEBUG=0
     depends_on:
@@ -28,7 +28,7 @@ services:
     container_name: staging-upwork-tracker-mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: upwork-tracker
+      MYSQL_DATABASE: upwork_tracker_staging
       MYSQL_USER: upwork-tracker
       MYSQL_PASSWORD: 12345678
     ports:

@@ -15,7 +15,7 @@ services:
     environment:
       - APP_ENV=prod
       - APP_DEBUG=0
-      - DATABASE_URL=mysql://upwork-tracker:${MYSQL_PASSWORD}@mysql:3306/upwork-tracker
+      - DATABASE_URL=mysql://upwork-tracker:${MYSQL_PASSWORD}@mysql:3306/upwork_tracker_prod
     depends_on:
       - mysql
 
@@ -35,7 +35,7 @@ services:
     container_name: upwork-tracker-mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: upwork-tracker
+      MYSQL_DATABASE: upwork_tracker_prod
       MYSQL_USER: upwork-tracker
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-12345678}
     ports:
