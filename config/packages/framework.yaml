@@ -17,6 +17,10 @@ framework:
     php_errors:
         log: true
 
+    # Trust reverse proxy (Apache/Nginx) headers for HTTPS detection
+    trusted_proxies: '127.0.0.1,REMOTE_ADDR'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-proto', 'x-forwarded-port']
+
 when@test:
     framework:
         test: true
