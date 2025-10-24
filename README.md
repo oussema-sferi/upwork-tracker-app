@@ -33,3 +33,4 @@ Internal solution to connect to Upwork API, check for jobs, notify via WhatsApp/
 - **Containerization**: Docker
 - **CI/CD**: GitHub Actions
 - **Deployment**: OVH Ubuntu VPS
+- **Branch Protection**: Enabled for professional workflow
