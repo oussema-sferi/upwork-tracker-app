@@ -16,9 +16,15 @@ Internal solution to connect to Upwork API, check for jobs, notify via WhatsApp/
 - **Local**: `http://localhost:8080`
 
 ## Database Management
-- **phpMyAdmin**: `http://51.222.24.219/phpmyadmin`
+- **phpMyAdmin**: `http://VPS_IP/phpmyadmin`
 - **Production DB**: `upwork_tracker_prod` (port 3307)
 - **Staging DB**: `upwork_tracker_staging` (port 3308)
+
+## Environment Variables
+- `VPS_IP`: Your VPS IP address
+- `VPS_HOST`: Your VPS hostname
+- `VPS_USER`: Your VPS username
+- `VPS_SSH_KEY`: Your SSH private key
 
 ## Tech Stack
 - **Framework**: Symfony 6.4 (LTS)
