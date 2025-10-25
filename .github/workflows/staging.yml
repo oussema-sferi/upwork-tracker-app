@@ -48,6 +48,7 @@ jobs:
             
             # Set environment variables from GitHub Secrets
             export MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD_STAGING }}
+            export DATABASE_URL=mysql://upwork-tracker:${MYSQL_PASSWORD}@staging-upwork-tracker-mysql:3306/upwork_tracker_staging
             export UPWORK_API_KEY=${{ secrets.UPWORK_API_KEY }}
             export UPWORK_API_SECRET=${{ secrets.UPWORK_API_SECRET }}
             export UPWORK_CALLBACK_URL=https://staging-upwork-tracker.oussema-sferi.dev/oauth/upwork/callback
