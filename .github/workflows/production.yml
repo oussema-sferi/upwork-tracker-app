@@ -44,6 +44,8 @@ jobs:
             git reset --hard origin/main
             
             # Set environment variables from GitHub Secrets
+            export APP_ENV=prod
+            export APP_DEBUG=0
             export MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD_PROD }}
             export DATABASE_URL=mysql://upwork-tracker:${MYSQL_PASSWORD}@mysql:3306/upwork_tracker_prod
             export UPWORK_API_KEY=${{ secrets.UPWORK_API_KEY }}
