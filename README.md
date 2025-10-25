@@ -26,6 +26,24 @@ Internal solution to connect to Upwork API, check for jobs, notify via WhatsApp/
 - `VPS_USER`: Your VPS username
 - `VPS_SSH_KEY`: Your SSH private key
 
+## Development Setup
+
+### Local Development
+```bash
+# Start development environment
+docker-compose --env-file .env.local up -d
+
+# Stop development environment
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Access application
+# Web: http://localhost:8080
+# phpMyAdmin: http://localhost:8082
+```
+
 ## Tech Stack
 - **Framework**: Symfony 6.4 (LTS)
 - **PHP**: 8.3

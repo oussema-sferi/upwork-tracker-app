@@ -1,0 +1,145 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Settings{% endblock %}
+
+{% block body %}
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Settings</h4>
+                    <p class="card-description">Configure your Upwork tracker preferences</p>
+                    
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+
+                    <form method="post" class="forms-sample">
+                        <!-- API Keys Section -->
+                        <div class="form-group">
+                            <h5 class="mb-3">
+                                <i class="icon-key menu-icon"></i>
+                                API Keys
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="upwork_api_key">Upwork API Key</label>
+                                    <input type="text" class="form-control" id="upwork_api_key" 
+                                           value="••••••••••••••••" readonly>
+                                    <small class="form-text text-muted">Configured in environment variables</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="openai_api_key">OpenAI API Key</label>
+                                    <input type="text" class="form-control" id="openai_api_key" 
+                                           value="••••••••••••••••" readonly>
+                                    <small class="form-text text-muted">Configured in environment variables</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="telegram_bot_token">Telegram Bot Token</label>
+                                    <input type="text" class="form-control" id="telegram_bot_token" 
+                                           value="••••••••••••••••" readonly>
+                                    <small class="form-text text-muted">Configured in environment variables</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Search Criteria Section -->
+                        <div class="form-group">
+                            <h5 class="mb-3">
+                                <i class="icon-search menu-icon"></i>
+                                Search Criteria
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label for="keywords">Keywords *</label>
+                                    <textarea class="form-control" id="keywords" name="keywords" rows="3" 
+                                              placeholder="php, laravel, symfony, javascript, react" required>{{ settings.keywords }}</textarea>
+                                    <small class="form-text text-muted">Comma-separated keywords to search for</small>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <label for="min_proposals">Min Proposals</label>
+                                    <input type="number" class="form-control" id="min_proposals" name="min_proposals" 
+                                           value="{{ settings.minProposals }}" min="0">
+                                    <small class="form-text text-muted">Minimum number of proposals (0 = any)</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="max_proposals">Max Proposals</label>
+                                    <input type="number" class="form-control" id="max_proposals" name="max_proposals" 
+                                           value="{{ settings.maxProposals }}" min="0">
+                                    <small class="form-text text-muted">Maximum number of proposals (0 = any)</small>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <label for="excluded_countries">Excluded Countries</label>
+                                    <textarea class="form-control" id="excluded_countries" name="excluded_countries" rows="2" 
+                                              placeholder="US, CA, GB, AU">{{ settings.excludedCountries }}</textarea>
+                                    <small class="form-text text-muted">Comma-separated country codes to exclude</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Notifications Section -->
+                        <div class="form-group">
+                            <h5 class="mb-3">
+                                <i class="icon-bell menu-icon"></i>
+                                Notifications
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="email_notifications" 
+                                               name="email_notifications" value="1" 
+                                               {{ settings.emailNotifications ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="email_notifications">
+                                            Email Notifications
+                                        </label>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label for="email_address">Email Address</label>
+                                        <input type="email" class="form-control" id="email_address" name="email_address" 
+                                               value="{{ settings.emailAddress }}" placeholder="your@email.com">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="telegram_notifications" 
+                                               name="telegram_notifications" value="1" 
+                                               {{ settings.telegramNotifications ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="telegram_notifications">
+                                            Telegram Notifications
+                                        </label>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label for="telegram_chat_id">Telegram Chat ID</label>
+                                        <input type="text" class="form-control" id="telegram_chat_id" name="telegram_chat_id" 
+                                               value="{{ settings.telegramChatId }}" placeholder="123456789">
+                                        <small class="form-text text-muted">Your Telegram chat ID for notifications</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary mr-2">Save Settings</button>
+                            <a href="{{ path('app_dashboard') }}" class="btn btn-light">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
