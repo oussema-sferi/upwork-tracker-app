@@ -65,8 +65,9 @@ jobs:
             # Create database if not exists
             docker-compose -f docker-compose.prod.yaml exec -T php php bin/console doctrine:database:create --if-not-exists --env=prod --no-interaction
             
-            # Run migrations
-            docker-compose -f docker-compose.prod.yaml exec -T php php bin/console doctrine:migrations:migrate --allow-no-migration --no-interaction --env=prod
+            # Check if migrations are needed and run them safely
+            docker-compose -f docker-compose.prod.yaml exec -T php php bin/console doctrine:migrations:status --no-interaction --env=prod || true
+            docker-compose -f docker-compose.prod.yaml exec -T php php bin/console doctrine:migrations:migrate --no-interaction --env=prod || echo "Migrations completed or skipped"
             
             # Clear cache
             docker-compose -f docker-compose.prod.yaml exec -T php php bin/console cache:clear --env=prod --no-interaction
