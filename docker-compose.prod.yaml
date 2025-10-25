@@ -15,7 +15,7 @@ services:
     environment:
       - APP_ENV=${APP_ENV:-prod}
       - APP_DEBUG=${APP_DEBUG:-0}
-      - DATABASE_URL=${DATABASE_URL:-mysql://upwork-tracker:${MYSQL_PASSWORD}@mysql:3306/upwork_tracker_prod}
+      - DATABASE_URL=${DATABASE_URL}
       - UPWORK_API_KEY=${UPWORK_API_KEY}
       - UPWORK_API_SECRET=${UPWORK_API_SECRET}
       - UPWORK_CALLBACK_URL=${UPWORK_CALLBACK_URL}
