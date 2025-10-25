@@ -46,8 +46,11 @@ jobs:
             git fetch origin develop
             git reset --hard origin/develop
             
-            # Set environment variables
-            export MYSQL_PASSWORD=12345678
+            # Set environment variables from GitHub Secrets
+            export MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD_STAGING }}
+            export UPWORK_API_KEY=${{ secrets.UPWORK_API_KEY }}
+            export UPWORK_API_SECRET=${{ secrets.UPWORK_API_SECRET }}
+            export UPWORK_CALLBACK_URL=https://staging-upwork-tracker.oussema-sferi.dev/oauth/upwork/callback
             
             # Stop existing containers
             docker-compose -f docker-compose.staging.yml down || true
