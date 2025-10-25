@@ -22,3 +22,9 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    
+    App\Service\UpworkApiService:
+        arguments:
+            $upworkApiKey: '%env(UPWORK_API_KEY)%'
+            $upworkApiSecret: '%env(UPWORK_API_SECRET)%'
+            $upworkCallbackUrl: '%env(UPWORK_CALLBACK_URL)%'

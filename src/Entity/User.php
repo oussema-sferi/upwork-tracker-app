@@ -31,6 +31,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $upworkAccessToken = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -102,5 +105,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    public function getUpworkAccessToken(): ?string
+    {
+        return $this->upworkAccessToken;
+    }
+
+    public function setUpworkAccessToken(?string $upworkAccessToken): static
+    {
+        $this->upworkAccessToken = $upworkAccessToken;
+        return $this;
     }
 }
