@@ -68,9 +68,8 @@ jobs:
             # Create database if not exists
             docker-compose -f docker-compose.staging.yml exec -T php php bin/console doctrine:database:create --if-not-exists --env=dev --no-interaction
             
-            # Check if migrations are needed and run them safely
-            docker-compose -f docker-compose.staging.yml exec -T php php bin/console doctrine:migrations:status --no-interaction --env=dev || true
-            docker-compose -f docker-compose.staging.yml exec -T php php bin/console doctrine:migrations:migrate --no-interaction --env=dev || echo "Migrations completed or skipped"
+            # Update database schema directly (bypass migrations for staging)
+            docker-compose -f docker-compose.staging.yml exec -T php php bin/console doctrine:schema:update --force --env=dev --no-interaction
             
             # Clear cache
             docker-compose -f docker-compose.staging.yml exec -T php php bin/console cache:clear --env=dev --no-interaction
