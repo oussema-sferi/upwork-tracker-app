@@ -121,4 +121,84 @@ class UpworkApiService
 
         return $data;
     }
+
+    public function searchJobs(string $accessToken, string $keyword): array
+    {
+        error_log('Searching jobs for keyword: ' . $keyword);
+        
+        $response = $this->httpClient->request('POST', 'https://api.upwork.com/graphql', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $accessToken,
+                'Content-Type' => 'application/json',
+            ],
+            'json' => [
+                'query' => '
+                  query {
+                    marketplaceJobPostings(
+                      marketPlaceJobFilter: { 
+                        searchExpression_eq: "' . $keyword . '" 
+                      },
+                      searchType: USER_JOBS_SEARCH,
+                      sortAttributes: { field: RECENCY }
+                    ) {
+                      edges {
+                        node {
+                          id
+                          title
+                          description
+                          createdDateTime
+                          skills {
+                            name
+                          }
+                        }
+                      }
+                    }
+                  }
+                '
+            ]
+        ]);
+
+        $statusCode = $response->getStatusCode();
+        error_log('Job search API response status: ' . $statusCode);
+        
+        $data = $response->toArray();
+       
+        error_log('Job search response: ' . json_encode($data));
+        
+        if ($statusCode !== 200) {
+            throw new \Exception('Job search failed: HTTP ' . $statusCode . ' - ' . json_encode($data));
+        }
+
+        // Extract jobs from GraphQL response
+        $jobs = [];
+        error_log('GraphQL response structure: ' . json_encode($data));
+        
+        if (isset($data['data']['marketplaceJobPostings']['edges'])) {
+            error_log('Found ' . count($data['data']['marketplaceJobPostings']['edges']) . ' job edges');
+            foreach ($data['data']['marketplaceJobPostings']['edges'] as $edge) {
+                $node = $edge['node'];
+                error_log('Processing job node: ' . json_encode($node));
+                $jobs[] = [
+                    'id' => $node['id'],
+                    'title' => $node['title'],
+                    'description' => $node['description'],
+                    'postedAt' => $node['createdDateTime'],
+                    'url' => 'https://www.upwork.com/jobs/~02' . $node['id'], // Construct URL with ~02 prefix
+                    'budget' => 'Not specified', // Not available in this schema
+                    'client' => 'Unknown', // Not available in this schema
+                    'country' => 'Unknown', // Not available in this schema
+                    'skills' => implode(', ', array_column($node['skills'], 'name')),
+                    'proposals' => 0 // Not available in this schema
+                ];
+            }
+        } else {
+            error_log('No job edges found in response');
+            if (isset($data['data']['marketplaceJobPostings'])) {
+                error_log('marketplaceJobPostings structure: ' . json_encode($data['data']['marketplaceJobPostings']));
+            }
+        }
+
+        error_log('Extracted ' . count($jobs) . ' jobs from GraphQL response');
+        return $jobs;
+    }
 }

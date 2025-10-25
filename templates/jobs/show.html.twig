@@ -1,0 +1,80 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}{{ job.title }}{% endblock %}
+
+{% block body %}
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="card-title">{{ job.title }}</h4>
+                        <a href="{{ path('app_jobs_index') }}" class="btn btn-light">
+                            <i class="icon-arrow-left"></i>
+                            Back to Jobs
+                        </a>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-4">
+                                <h6>Description</h6>
+                                <div class="border p-3 rounded" style="max-height: 400px; overflow-y: auto;">
+                                    {{ job.description|nl2br }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Job Details</h6>
+                                    
+                                    <div class="mb-3">
+                                        <strong>Client:</strong><br>
+                                        {{ job.client ?? 'Unknown' }}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <strong>Budget:</strong><br>
+                                        {{ job.budget ?? 'Not specified' }}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <strong>Country:</strong><br>
+                                        {{ job.country ?? 'Unknown' }}
+                                    </div>
+                                    
+                                    {% if job.skills %}
+                                        <div class="mb-3">
+                                            <strong>Skills:</strong><br>
+                                            <span class="badge badge-info">{{ job.skills }}</span>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="mb-3">
+                                        <strong>Posted:</strong><br>
+                                        {{ job.postedAt|date('F d, Y \a\t g:i A') }}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <strong>Found:</strong><br>
+                                        {{ job.createdAt|date('F d, Y \a\t g:i A') }}
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <a href="{{ job.url }}" target="_blank" class="btn btn-primary btn-block">
+                                            <i class="icon-external-link"></i>
+                                            View on Upwork
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
