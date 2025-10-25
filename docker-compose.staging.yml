@@ -7,9 +7,12 @@ services:
       - .:/var/www/symfony
     working_dir: /var/www/symfony
     environment:
-      - DATABASE_URL=mysql://upwork-tracker:12345678@staging-upwork-tracker-mysql:3306/upwork_tracker_staging
-      - APP_ENV=dev
-      - APP_DEBUG=1
+      - DATABASE_URL=${DATABASE_URL:-mysql://upwork-tracker:12345678@staging-upwork-tracker-mysql:3306/upwork_tracker_staging}
+      - APP_ENV=${APP_ENV:-dev}
+      - APP_DEBUG=${APP_DEBUG:-1}
+      - UPWORK_API_KEY=${UPWORK_API_KEY}
+      - UPWORK_API_SECRET=${UPWORK_API_SECRET}
+      - UPWORK_CALLBACK_URL=${UPWORK_CALLBACK_URL}
     depends_on:
       - mysql
 
@@ -30,7 +33,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: upwork_tracker_staging
       MYSQL_USER: upwork-tracker
-      MYSQL_PASSWORD: 12345678
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-12345678}
     ports:
       - "3308:3306"
     volumes:

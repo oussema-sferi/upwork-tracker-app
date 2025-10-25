@@ -43,8 +43,11 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             
-            # Set environment variables
-            export MYSQL_PASSWORD=12345678
+            # Set environment variables from GitHub Secrets
+            export MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD_PROD }}
+            export UPWORK_API_KEY=${{ secrets.UPWORK_API_KEY }}
+            export UPWORK_API_SECRET=${{ secrets.UPWORK_API_SECRET }}
+            export UPWORK_CALLBACK_URL=https://upwork-tracker.oussema-sferi.dev/oauth/upwork/callback
             
             # Stop existing containers
             docker-compose -f docker-compose.prod.yaml down || true

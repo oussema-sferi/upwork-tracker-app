@@ -13,9 +13,12 @@ services:
       - .:/var/www/symfony
     working_dir: /var/www/symfony
     environment:
-      - APP_ENV=prod
-      - APP_DEBUG=0
-      - DATABASE_URL=mysql://upwork-tracker:${MYSQL_PASSWORD}@mysql:3306/upwork_tracker_prod
+      - APP_ENV=${APP_ENV:-prod}
+      - APP_DEBUG=${APP_DEBUG:-0}
+      - DATABASE_URL=${DATABASE_URL:-mysql://upwork-tracker:${MYSQL_PASSWORD}@mysql:3306/upwork_tracker_prod}
+      - UPWORK_API_KEY=${UPWORK_API_KEY}
+      - UPWORK_API_SECRET=${UPWORK_API_SECRET}
+      - UPWORK_CALLBACK_URL=${UPWORK_CALLBACK_URL}
     depends_on:
       - mysql
 
