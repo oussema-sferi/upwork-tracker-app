@@ -52,3 +52,4 @@ docker-compose logs -f
 - **CI/CD**: GitHub Actions
 - **Deployment**: OVH Ubuntu VPS
 - **Branch Protection**: Enabled for professional workflow
+# Clean deployment
