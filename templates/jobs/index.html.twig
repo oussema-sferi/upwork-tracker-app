@@ -157,6 +157,11 @@
                                             <td>
                                                 {% if job.client %}
                                                     {{ job.client.location }}
+                                                    {% if job.client.isVerified() %}
+                                                        <span class="badge badge-success badge-sm ml-1">
+                                                            <i class="fa fa-check-circle"></i>
+                                                        </span>
+                                                    {% endif %}
                                                 {% else %}
                                                     Unknown
                                                 {% endif %}

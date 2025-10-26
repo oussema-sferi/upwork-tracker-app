@@ -206,9 +206,10 @@ class JobMonitoringService
 
         // Create new client
         $client = new Client();
-        $client->setName($clientData['name']);
         $client->setCountry($clientData['country']);
         $client->setCity($clientData['city']);
+        $client->setState($clientData['state']);
+        $client->setVerificationStatus($clientData['verificationStatus']);
 
         $this->entityManager->persist($client);
         $this->entityManager->flush();

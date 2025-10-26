@@ -150,8 +150,12 @@ class UpworkApiService
                         client {
                             location {
                             country
+                            state
                             city
                             }
+                            
+                    totalHires
+                    verificationStatus
                         }
                           skills {
                             name
@@ -168,7 +172,7 @@ class UpworkApiService
         error_log('Job search API response status: ' . $statusCode);
         
         $data = $response->toArray();
-        
+    dd($data);
         error_log('Job search response: ' . json_encode($data));
         
         if ($statusCode !== 200) {
@@ -188,9 +192,10 @@ class UpworkApiService
                 $clientData = null;
                 if (isset($node['client']['location'])) {
                     $clientData = [
-                        'name' => $node['client']['name'] ?? null,
                         'country' => $node['client']['location']['country'] ?? null,
                         'city' => $node['client']['location']['city'] ?? null,
+                        'state' => $node['client']['location']['state'] ?? null,
+                        'verificationStatus' => $node['client']['verificationStatus'] ?? null,
                     ];
                 }
                 

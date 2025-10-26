@@ -16,13 +16,16 @@ class Client
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $name = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $country = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $city = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $state = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $verificationStatus = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -44,17 +47,6 @@ class Client
         return $this->id;
     }
 
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(?string $name): static
-    {
-        $this->name = $name;
-        return $this;
-    }
-
     public function getCountry(): ?string
     {
         return $this->country;
@@ -74,6 +66,28 @@ class Client
     public function setCity(?string $city): static
     {
         $this->city = $city;
+        return $this;
+    }
+
+    public function getState(): ?string
+    {
+        return $this->state;
+    }
+
+    public function setState(?string $state): static
+    {
+        $this->state = $state;
+        return $this;
+    }
+
+    public function getVerificationStatus(): ?string
+    {
+        return $this->verificationStatus;
+    }
+
+    public function setVerificationStatus(?string $verificationStatus): static
+    {
+        $this->verificationStatus = $verificationStatus;
         return $this;
     }
 
@@ -117,7 +131,12 @@ class Client
 
     public function getLocation(): string
     {
-        $parts = array_filter([$this->city, $this->country]);
+        $parts = array_filter([$this->city, $this->state, $this->country]);
         return implode(', ', $parts);
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->verificationStatus === 'VERIFIED';
     }
 }
