@@ -172,7 +172,6 @@ class UpworkApiService
         error_log('Job search API response status: ' . $statusCode);
         
         $data = $response->toArray();
-    dd($data);
         error_log('Job search response: ' . json_encode($data));
         
         if ($statusCode !== 200) {
