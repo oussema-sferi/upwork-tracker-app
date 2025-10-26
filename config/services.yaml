@@ -28,3 +28,7 @@ services:
             $upworkApiKey: '%env(UPWORK_API_KEY)%'
             $upworkApiSecret: '%env(UPWORK_API_SECRET)%'
             $upworkCallbackUrl: '%env(UPWORK_CALLBACK_URL)%'
+    
+    App\Controller\ProfileController:
+        arguments:
+            $profilePicturesDirectory: '%kernel.project_dir%/public/uploads/profile_pictures'
