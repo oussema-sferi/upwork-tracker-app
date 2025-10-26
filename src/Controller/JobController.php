@@ -119,8 +119,10 @@ class JobController extends AbstractController
                         'title' => $job->getTitle(),
                         'description' => $job->getDescription(),
                         'budget' => $job->getBudget(),
-                        'client' => $job->getClient(),
-                        'country' => $job->getCountry(),
+                        'client' => $job->getClient() ? [
+                            'name' => $job->getClient()->getName(),
+                            'location' => $job->getClient()->getLocation(),
+                        ] : null,
                         'skills' => $job->getSkills(),
                         'createdAt' => $job->getCreatedAt() ? $job->getCreatedAt()->format('Y-m-d H:i:s') : null,
                         'url' => $job->getUrl(),

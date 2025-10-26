@@ -34,8 +34,6 @@ class Job
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $budget = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $client = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $country = null;
@@ -49,6 +47,10 @@ class Job
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
+
+    #[ORM\ManyToOne(targetEntity: Client::class, inversedBy: 'jobs')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Client $client = null;
 
     /**
      * @var Collection<int, Alert>
@@ -168,16 +170,6 @@ class Job
         return $this;
     }
 
-    public function getClient(): ?string
-    {
-        return $this->client;
-    }
-
-    public function setClient(?string $client): static
-    {
-        $this->client = $client;
-        return $this;
-    }
 
     public function getCountry(): ?string
     {
@@ -220,6 +212,17 @@ class Job
     public function setUser(?User $user): static
     {
         $this->user = $user;
+        return $this;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
+    public function setClient(?Client $client): static
+    {
+        $this->client = $client;
         return $this;
     }
 }

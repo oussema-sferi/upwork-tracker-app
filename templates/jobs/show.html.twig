@@ -32,7 +32,11 @@
                                     
                                     <div class="mb-3">
                                         <strong>Client:</strong><br>
-                                        {{ job.client ?? 'Unknown' }}
+                                        {% if job.client %}
+                                            {{ job.client.name ?? 'Unknown' }}
+                                        {% else %}
+                                            Unknown
+                                        {% endif %}
                                     </div>
                                     
                                     <div class="mb-3">
@@ -41,8 +45,12 @@
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <strong>Country:</strong><br>
-                                        {{ job.country ?? 'Unknown' }}
+                                        <strong>Location:</strong><br>
+                                        {% if job.client %}
+                                            {{ job.client.location }}
+                                        {% else %}
+                                            Unknown
+                                        {% endif %}
                                     </div>
                                     
                                     {% if job.skills %}
