@@ -13,15 +13,33 @@
                             <h4 class="card-title">Upwork Jobs</h4>
                             <p class="text-muted mb-0">
                                 <i class="icon-briefcase"></i>
-                                Total: <strong>{{ jobs|length }}</strong> jobs found
+                                Total: <strong>{{ pagination.total_items }}</strong> jobs found
+                                {% if pagination.total_pages > 1 %}
+                                    (Page {{ pagination.current_page }} of {{ pagination.total_pages }})
+                                {% endif %}
                             </p>
                         </div>
-                        <form method="post" action="{{ path('app_jobs_fetch') }}" class="d-inline">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="icon-refresh"></i>
-                                Fetch New Jobs
-                            </button>
-                        </form>
+                        <div class="d-flex align-items-center">
+                            <form method="get" class="d-inline mr-3">
+                                <div class="form-group mb-0">
+                                    <label for="per_page" class="sr-only">Items per page</label>
+                                    <select name="per_page" id="per_page" class="form-control form-control-sm" onchange="this.form.submit()">
+                                        {% for option in allowedPerPage %}
+                                            <option value="{{ option }}" {% if perPage == option %}selected{% endif %}>
+                                                {{ option }} per page
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <input type="hidden" name="page" value="{{ pagination.current_page }}">
+                            </form>
+                            <form method="post" action="{{ path('app_jobs_fetch') }}" class="d-inline">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="icon-refresh"></i>
+                                    Fetch New Jobs
+                                </button>
+                            </form>
+                        </div>
                     </div>
 
                     {% for message in app.flashes('success') %}
@@ -116,6 +134,79 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Pagination Controls -->
+                        {% if pagination.total_pages > 1 %}
+                            <nav aria-label="Jobs pagination" class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    <!-- Previous Page -->
+                                    {% if pagination.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ path('app_jobs_index', {'page': pagination.previous_page, 'per_page': perPage}) }}">
+                                                <i class="icon-arrow-left"></i> Previous
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">
+                                                <i class="icon-arrow-left"></i> Previous
+                                            </span>
+                                        </li>
+                                    {% endif %}
+
+                                    <!-- Page Numbers -->
+                                    {% set startPage = max(1, pagination.current_page - 2) %}
+                                    {% set endPage = min(pagination.total_pages, pagination.current_page + 2) %}
+                                    
+                                    {% if startPage > 1 %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ path('app_jobs_index', {'page': 1, 'per_page': perPage}) }}">1</a>
+                                        </li>
+                                        {% if startPage > 2 %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {% for pageNum in startPage..endPage %}
+                                        <li class="page-item {% if pageNum == pagination.current_page %}active{% endif %}">
+                                            {% if pageNum == pagination.current_page %}
+                                                <span class="page-link">{{ pageNum }}</span>
+                                            {% else %}
+                                                <a class="page-link" href="{{ path('app_jobs_index', {'page': pageNum, 'per_page': perPage}) }}">{{ pageNum }}</a>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+
+                                    {% if endPage < pagination.total_pages %}
+                                        {% if endPage < pagination.total_pages - 1 %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        {% endif %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ path('app_jobs_index', {'page': pagination.total_pages, 'per_page': perPage}) }}">{{ pagination.total_pages }}</a>
+                                        </li>
+                                    {% endif %}
+
+                                    <!-- Next Page -->
+                                    {% if pagination.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ path('app_jobs_index', {'page': pagination.next_page, 'per_page': perPage}) }}">
+                                                Next <i class="icon-arrow-right"></i>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <span class="page-link">
+                                                Next <i class="icon-arrow-right"></i>
+                                            </span>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

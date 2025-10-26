@@ -21,13 +21,29 @@ class JobController extends AbstractController
     }
 
     #[Route('/', name: 'app_jobs_index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $user = $this->getUser();
-        $jobs = $this->jobMonitoringService->getJobsForUser($user);
+        
+        // Get pagination parameters
+        $page = max(1, (int) $request->query->get('page', 1));
+        $perPage = (int) $request->query->get('per_page', 20);
+        
+        // Validate per_page value
+        $allowedPerPage = [10, 20, 30, 50];
+        if (!in_array($perPage, $allowedPerPage)) {
+            $perPage = 20;
+        }
+        
+        // Get paginated jobs
+        $paginationData = $this->jobMonitoringService->getJobsForUserPaginated($user, $page, $perPage);
 
         return $this->render('jobs/index.html.twig', [
-            'jobs' => $jobs,
+            'jobs' => $paginationData['jobs'],
+            'pagination' => $paginationData['pagination'],
+            'currentPage' => $page,
+            'perPage' => $perPage,
+            'allowedPerPage' => $allowedPerPage,
         ]);
     }
 

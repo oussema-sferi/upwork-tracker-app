@@ -198,4 +198,37 @@ class JobMonitoringService
     {
         return $this->jobRepository->findOneBy(['id' => $id, 'user' => $user]);
     }
+
+    public function getJobsForUserPaginated(User $user, int $page = 1, int $perPage = 20): array
+    {
+        $offset = ($page - 1) * $perPage;
+        
+        // Get total count
+        $totalJobs = $this->jobRepository->count(['user' => $user]);
+        
+        // Get jobs for current page
+        $jobs = $this->jobRepository->findBy(
+            ['user' => $user],
+            ['createdAt' => 'DESC'],
+            $perPage,
+            $offset
+        );
+        
+        // Calculate pagination info
+        $totalPages = ceil($totalJobs / $perPage);
+        
+        return [
+            'jobs' => $jobs,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total_items' => $totalJobs,
+                'total_pages' => $totalPages,
+                'has_previous' => $page > 1,
+                'has_next' => $page < $totalPages,
+                'previous_page' => $page > 1 ? $page - 1 : null,
+                'next_page' => $page < $totalPages ? $page + 1 : null,
+            ]
+        ];
+    }
 }
