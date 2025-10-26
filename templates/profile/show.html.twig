@@ -1,0 +1,123 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block body %}
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Profile</h4>
+            <p class="card-description">Manage your personal information</p>
+            
+            <!-- Flash Messages -->
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fa fa-check-circle mr-2"></i>
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fa fa-exclamation-circle mr-2"></i>
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+
+            <!-- Profile Information -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <!-- Profile Picture -->
+                                    {% if user.profilePicture %}
+                                        <img src="{{ asset('uploads/profile_pictures/' ~ user.profilePicture) }}" 
+                                             alt="Profile Picture" 
+                                             class="img-lg rounded-circle">
+                                    {% else %}
+                                        <div class="img-lg rounded-circle bg-light d-flex align-items-center justify-content-center">
+                                            <i class="fa fa-user fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-9">
+                                    <h3 class="mb-2">
+                                        {% if user.fullName %}
+                                            {{ user.fullName }}
+                                        {% else %}
+                                            {{ user.email }}
+                                        {% endif %}
+                                    </h3>
+                                    <p class="text-muted mb-3">{{ user.email }}</p>
+                                    
+                                    {% if user.firstName or user.lastName %}
+                                        <div class="row">
+                                            {% if user.firstName %}
+                                                <div class="col-md-6">
+                                                    <label class="form-label">First Name</label>
+                                                    <p class="form-control-plaintext">{{ user.firstName }}</p>
+                                                </div>
+                                            {% endif %}
+                                            
+                                            {% if user.lastName %}
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Last Name</label>
+                                                    <p class="form-control-plaintext">{{ user.lastName }}</p>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <a href="{{ path('app_profile_edit') }}" class="btn btn-primary">
+                                        <i class="fa fa-edit mr-2"></i>
+                                        Edit Profile
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Account Information</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Email Address</label>
+                                <p class="form-control-plaintext">{{ user.email }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Upwork Connection</label>
+                                <p class="form-control-plaintext">
+                                    {% if user.upworkAccessToken %}
+                                        <span class="badge badge-success">
+                                            <i class="fa fa-check mr-1"></i>
+                                            Connected
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-warning">
+                                            <i class="fa fa-exclamation-triangle mr-1"></i>
+                                            Not Connected
+                                        </span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

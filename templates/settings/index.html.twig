@@ -51,6 +51,43 @@
 
                         <hr>
 
+                        <!-- Upwork Connection Section -->
+                        <div class="form-group">
+                            <h5 class="mb-3">
+                                <i class="icon-link menu-icon"></i>
+                                Upwork Connection
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    {% if app.user.upworkAccessToken %}
+                                        <div class="alert alert-success">
+                                            <i class="icon-check-circle"></i>
+                                            <strong>Connected to Upwork</strong>
+                                            <p class="mb-0">You are successfully connected to Upwork API.</p>
+                                        </div>
+                                        <div class="mt-2">
+                                            <a href="{{ path('upwork_oauth_test_api') }}" class="btn btn-info mr-2">
+                                                <i class="icon-check"></i>
+                                                Test API Connection
+                                            </a>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-warning">
+                                            <i class="icon-alert-circle"></i>
+                                            <strong>Not Connected to Upwork</strong>
+                                            <p class="mb-0">Connect to Upwork to start fetching jobs automatically.</p>
+                                        </div>
+                                        <a href="{{ path('upwork_oauth_authorize') }}" class="btn btn-primary">
+                                            <i class="icon-link"></i>
+                                            Connect to Upwork
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
                         <!-- Search Criteria Section -->
                         <div class="form-group">
                             <h5 class="mb-3">
@@ -137,6 +174,18 @@
                             <a href="{{ path('app_dashboard') }}" class="btn btn-light">Cancel</a>
                         </div>
                     </form>
+                    
+                    <!-- Upwork Disconnect Form (outside main form to avoid conflicts) -->
+                    {% if app.user.upworkAccessToken %}
+                        <div class="mt-3">
+                            <form method="post" action="{{ path('upwork_oauth_disconnect') }}" class="d-inline">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="icon-close"></i>
+                                    Disconnect from Upwork
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
