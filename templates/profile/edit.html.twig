@@ -1,0 +1,222 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block body %}
+<div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Edit Profile</h4>
+            <p class="card-description">Update your personal information</p>
+            
+            <!-- Flash Messages -->
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fa fa-check-circle mr-2"></i>
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fa fa-exclamation-circle mr-2"></i>
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+
+            <form method="post" enctype="multipart/form-data">
+                <!-- Profile Picture Section -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Profile Picture</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-3">
+                                <!-- Current Profile Picture -->
+                                {% if user.profilePicture %}
+                                    <img src="{{ asset('uploads/profile_pictures/' ~ user.profilePicture) }}" 
+                                         alt="Current Profile Picture" 
+                                         id="currentProfilePicture"
+                                         class="img-lg rounded-circle">
+                                {% else %}
+                                    <div id="currentProfilePicture" class="img-lg rounded-circle bg-light d-flex align-items-center justify-content-center">
+                                        <i class="fa fa-user fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-9">
+                                <label for="profilePicture" class="form-label">Upload New Picture</label>
+                                <input type="file" 
+                                       id="profilePicture" 
+                                       name="profilePicture" 
+                                       accept="image/*"
+                                       class="form-control">
+                                <small class="form-text text-muted">PNG, JPG, GIF up to 10MB</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information Section -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Personal Information</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="firstName" class="form-label">First Name</label>
+                                    <input type="text" 
+                                           id="firstName" 
+                                           name="firstName" 
+                                           value="{{ user.firstName ?? '' }}"
+                                           class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <input type="text" 
+                                           id="lastName" 
+                                           name="lastName" 
+                                           value="{{ user.lastName ?? '' }}"
+                                           class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password Change Section -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title">Change Password</h5>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="togglePasswordSection">
+                                <i class="fa fa-key mr-1"></i>
+                                Change Password
+                            </button>
+                        </div>
+                        
+                        <div id="passwordSection" style="display: none;">
+                            <p class="card-description">Leave blank to keep current password</p>
+                            
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="currentPassword" class="form-label">Current Password</label>
+                                        <input type="password" 
+                                               id="currentPassword" 
+                                               name="currentPassword" 
+                                               class="form-control"
+                                               placeholder="Enter your current password">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="newPassword" class="form-label">New Password</label>
+                                        <input type="password" 
+                                               id="newPassword" 
+                                               name="newPassword" 
+                                               class="form-control"
+                                               placeholder="Enter new password">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                        <input type="password" 
+                                               id="confirmPassword" 
+                                               name="confirmPassword" 
+                                               class="form-control"
+                                               placeholder="Confirm new password">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa fa-save mr-2"></i>
+                                    Save Changes
+                                </button>
+                                <a href="{{ path('app_profile_show') }}" class="btn btn-secondary ml-2">
+                                    <i class="fa fa-times mr-2"></i>
+                                    Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const profilePictureInput = document.getElementById('profilePicture');
+    const currentProfilePicture = document.getElementById('currentProfilePicture');
+    
+    profilePictureInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentProfilePicture.innerHTML = `<img src="${e.target.result}" alt="Preview" class="img-lg rounded-circle">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Password section toggle
+    const togglePasswordBtn = document.getElementById('togglePasswordSection');
+    const passwordSection = document.getElementById('passwordSection');
+    
+    togglePasswordBtn.addEventListener('click', function() {
+        if (passwordSection.style.display === 'none') {
+            passwordSection.style.display = 'block';
+            togglePasswordBtn.innerHTML = '<i class="fa fa-eye-slash mr-1"></i>Hide Password Change';
+            togglePasswordBtn.classList.remove('btn-outline-primary');
+            togglePasswordBtn.classList.add('btn-outline-secondary');
+        } else {
+            passwordSection.style.display = 'none';
+            togglePasswordBtn.innerHTML = '<i class="fa fa-key mr-1"></i>Change Password';
+            togglePasswordBtn.classList.remove('btn-outline-secondary');
+            togglePasswordBtn.classList.add('btn-outline-primary');
+        }
+    });
+    
+    // Password confirmation validation
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    
+    function validatePasswordMatch() {
+        if (newPasswordInput.value !== confirmPasswordInput.value) {
+            confirmPasswordInput.setCustomValidity('Passwords do not match');
+        } else {
+            confirmPasswordInput.setCustomValidity('');
+        }
+    }
+    
+    newPasswordInput.addEventListener('input', validatePasswordMatch);
+    confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+});
+</script>
+{% endblock %}

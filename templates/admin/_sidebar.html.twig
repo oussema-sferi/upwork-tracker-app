@@ -1,13 +1,21 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
     <div class="user-profile">
         <div class="user-image">
-            <img src="{{ asset('admin/images/faces/face28.png') }}">
+            {% if app.user.profilePicture %}
+                <img src="{{ asset('uploads/profile_pictures/' ~ app.user.profilePicture) }}" alt="Profile Picture">
+            {% else %}
+                <img src="{{ asset('admin/images/faces/face28.png') }}" alt="Default Profile">
+            {% endif %}
         </div>
         <div class="user-name">
-            {{ app.user.email }}
+            {% if app.user.fullName %}
+                {{ app.user.fullName }}
+            {% else %}
+                {{ app.user.email }}
+            {% endif %}
         </div>
         <div class="user-designation">
-            Freelance Developer
+            {{ app.user.email }}
         </div>
     </div>
     <!-- Sidebar Menus -->

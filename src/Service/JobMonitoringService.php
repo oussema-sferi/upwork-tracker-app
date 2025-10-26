@@ -198,4 +198,49 @@ class JobMonitoringService
     {
         return $this->jobRepository->findOneBy(['id' => $id, 'user' => $user]);
     }
+
+    public function getJobsForUserPaginated(User $user, int $page = 1, int $perPage = 20, ?string $search = null): array
+    {
+        $offset = ($page - 1) * $perPage;
+        
+        // Build query with search if provided
+        $qb = $this->jobRepository->createQueryBuilder('j')
+            ->where('j.user = :user')
+            ->setParameter('user', $user);
+        
+        if ($search) {
+            $qb->andWhere('j.title LIKE :search OR j.description LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+        
+        // Get total count
+        $totalJobs = $qb->select('COUNT(j.id)')
+                       ->getQuery()
+                       ->getSingleScalarResult();
+        
+        // Get jobs for current page
+        $jobs = $qb->select('j')
+                   ->orderBy('j.createdAt', 'DESC')
+                   ->setMaxResults($perPage)
+                   ->setFirstResult($offset)
+                   ->getQuery()
+                   ->getResult();
+        
+        // Calculate pagination info
+        $totalPages = ceil($totalJobs / $perPage);
+        
+        return [
+            'jobs' => $jobs,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total_items' => $totalJobs,
+                'total_pages' => $totalPages,
+                'has_previous' => $page > 1,
+                'has_next' => $page < $totalPages,
+                'previous_page' => $page > 1 ? $page - 1 : null,
+                'next_page' => $page < $totalPages ? $page + 1 : null,
+            ]
+        ];
+    }
 }
