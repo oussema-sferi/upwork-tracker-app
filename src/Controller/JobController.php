@@ -67,6 +67,7 @@ class JobController extends AbstractController
     #[Route('/fetch', name: 'app_jobs_fetch', methods: ['POST'])]
     public function fetch(): Response
     {
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
         if (!$user->getUpworkAccessToken()) {
