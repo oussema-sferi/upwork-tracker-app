@@ -147,6 +147,16 @@ class UpworkApiService
                           title
                           description
                           createdDateTime
+                        client {
+                            location {
+                            country
+                            state
+                            city
+                            }
+                            
+                    totalHires
+                    verificationStatus
+                        }
                           skills {
                             name
                           }
@@ -162,7 +172,6 @@ class UpworkApiService
         error_log('Job search API response status: ' . $statusCode);
         
         $data = $response->toArray();
-       
         error_log('Job search response: ' . json_encode($data));
         
         if ($statusCode !== 200) {
@@ -178,6 +187,17 @@ class UpworkApiService
             foreach ($data['data']['marketplaceJobPostings']['edges'] as $edge) {
                 $node = $edge['node'];
                 error_log('Processing job node: ' . json_encode($node));
+                // Extract client information
+                $clientData = null;
+                if (isset($node['client']['location'])) {
+                    $clientData = [
+                        'country' => $node['client']['location']['country'] ?? null,
+                        'city' => $node['client']['location']['city'] ?? null,
+                        'state' => $node['client']['location']['state'] ?? null,
+                        'verificationStatus' => $node['client']['verificationStatus'] ?? null,
+                    ];
+                }
+                
                 $jobs[] = [
                     'id' => $node['id'],
                     'title' => $node['title'],
@@ -185,8 +205,7 @@ class UpworkApiService
                     'postedAt' => $node['createdDateTime'],
                     'url' => 'https://www.upwork.com/jobs/~02' . $node['id'], // Construct URL with ~02 prefix
                     'budget' => 'Not specified', // Not available in this schema
-                    'client' => 'Unknown', // Not available in this schema
-                    'country' => 'Unknown', // Not available in this schema
+                    'client' => $clientData,
                     'skills' => implode(', ', array_column($node['skills'], 'name')),
                     'proposals' => 0 // Not available in this schema
                 ];

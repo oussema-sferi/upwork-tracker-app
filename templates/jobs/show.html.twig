@@ -32,7 +32,16 @@
                                     
                                     <div class="mb-3">
                                         <strong>Client:</strong><br>
-                                        {{ job.client ?? 'Unknown' }}
+                                        {% if job.client %}
+                                            <span class="text-muted">Location: {{ job.client.location }}</span>
+                                            {% if job.client.isVerified() %}
+                                                <span class="badge badge-success ml-2">
+                                                    <i class="fa fa-check-circle"></i> Verified
+                                                </span>
+                                            {% endif %}
+                                        {% else %}
+                                            Unknown
+                                        {% endif %}
                                     </div>
                                     
                                     <div class="mb-3">
@@ -41,8 +50,12 @@
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <strong>Country:</strong><br>
-                                        {{ job.country ?? 'Unknown' }}
+                                        <strong>Location:</strong><br>
+                                        {% if job.client %}
+                                            {{ job.client.location }}
+                                        {% else %}
+                                            Unknown
+                                        {% endif %}
                                     </div>
                                     
                                     {% if job.skills %}

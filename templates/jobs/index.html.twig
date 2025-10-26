@@ -135,7 +135,6 @@
                                             <input type="checkbox" id="selectAllCheckbox" title="Select All">
                                         </th>
                                         <th>Title</th>
-                                        <th>Client</th>
                                         <th>Budget</th>
                                         <th>Country</th>
                                         <th>Posted</th>
@@ -154,9 +153,19 @@
                                                     <br><small class="text-muted">{{ job.skills }}</small>
                                                 {% endif %}
                                             </td>
-                                            <td>{{ job.client ?? 'Unknown' }}</td>
                                             <td>{{ job.budget ?? 'Not specified' }}</td>
-                                            <td>{{ job.country ?? 'Unknown' }}</td>
+                                            <td>
+                                                {% if job.client %}
+                                                    {{ job.client.location }}
+                                                    {% if job.client.isVerified() %}
+                                                        <span class="badge badge-success badge-sm ml-1">
+                                                            <i class="fa fa-check-circle"></i>
+                                                        </span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    Unknown
+                                                {% endif %}
+                                            </td>
                                             <td>{{ job.postedAt|date('M d, Y') }}</td>
                                             <td>
                                                 <a href="{{ path('app_jobs_show', {'id': job.id}) }}" class="btn btn-sm btn-info">
@@ -408,8 +417,7 @@ document.addEventListener('DOMContentLoaded', function() {
         jobs.forEach(job => {
             const createdAt = job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'N/A';
             const budget = job.budget || 'Not specified';
-            const client = job.client || 'N/A';
-            const country = job.country || 'N/A';
+            const location = job.client ? job.client.location : 'Unknown';
             const skills = job.skills || 'N/A';
             
             html += `
@@ -422,9 +430,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             ${job.title}
                         </a>
                     </td>
-                    <td>${client}</td>
                     <td>${budget}</td>
-                    <td>${country}</td>
+                    <td>${location}</td>
                     <td>${createdAt}</td>
                     <td>
                         <button class="btn btn-sm btn-outline-danger delete-job-btn" data-job-id="${job.id}">

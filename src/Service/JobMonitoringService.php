@@ -2,9 +2,11 @@
 
 namespace App\Service;
 
+use App\Entity\Client;
 use App\Entity\Job;
 use App\Entity\Settings;
 use App\Entity\User;
+use App\Repository\ClientRepository;
 use App\Repository\JobRepository;
 use App\Repository\SettingsRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,7 +17,8 @@ class JobMonitoringService
         private readonly UpworkApiService $upworkApiService,
         private readonly EntityManagerInterface $entityManager,
         private readonly JobRepository $jobRepository,
-        private readonly SettingsRepository $settingsRepository
+        private readonly SettingsRepository $settingsRepository,
+        private readonly ClientRepository $clientRepository
     ) {
     }
 
@@ -170,10 +173,14 @@ class JobMonitoringService
             $job->setUrl($jobData['url']);
             $job->setPostedAt(new \DateTimeImmutable($jobData['postedAt']));
             $job->setBudget($jobData['budget'] ?? null);
-            $job->setClient($jobData['client'] ?? null);
-            $job->setCountry($jobData['country'] ?? null);
             $job->setSkills($jobData['skills'] ?? null);
             $job->setUser($user);
+
+            // Handle client creation
+            if (isset($jobData['client']) && is_array($jobData['client'])) {
+                $client = $this->findOrCreateClient($jobData['client']);
+                $job->setClient($client);
+            }
 
             $this->entityManager->persist($job);
             $this->entityManager->flush();
@@ -183,6 +190,31 @@ class JobMonitoringService
             error_log("Failed to create job: " . $e->getMessage());
             return null;
         }
+    }
+
+    private function findOrCreateClient(array $clientData): ?Client
+    {
+        // Try to find existing client by country and city
+        $existingClient = $this->clientRepository->findOneBy([
+            'country' => $clientData['country'],
+            'city' => $clientData['city']
+        ]);
+
+        if ($existingClient) {
+            return $existingClient;
+        }
+
+        // Create new client
+        $client = new Client();
+        $client->setCountry($clientData['country']);
+        $client->setCity($clientData['city']);
+        $client->setState($clientData['state']);
+        $client->setVerificationStatus($clientData['verificationStatus']);
+
+        $this->entityManager->persist($client);
+        $this->entityManager->flush();
+
+        return $client;
     }
 
     public function getJobsForUser(User $user, int $limit = 50): array
