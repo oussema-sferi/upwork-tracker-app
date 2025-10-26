@@ -9,7 +9,13 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="card-title">Upwork Jobs</h4>
+                        <div>
+                            <h4 class="card-title">Upwork Jobs</h4>
+                            <p class="text-muted mb-0">
+                                <i class="icon-briefcase"></i>
+                                Total: <strong>{{ jobs|length }}</strong> jobs found
+                            </p>
+                        </div>
                         <form method="post" action="{{ path('app_jobs_fetch') }}" class="d-inline">
                             <button type="submit" class="btn btn-primary">
                                 <i class="icon-refresh"></i>
@@ -52,10 +58,25 @@
                             <p class="text-muted">Click "Fetch New Jobs" to search for jobs based on your settings.</p>
                         </div>
                     {% else %}
+                        <!-- Bulk Actions -->
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-danger" id="bulkDeleteBtn" disabled>
+                                <i class="icon-trash"></i>
+                                Delete Selected (<span id="selectedCount">0</span>)
+                            </button>
+                        </div>
+
+                        <form id="bulkDeleteForm" method="post" action="{{ path('app_jobs_bulk_delete') }}">
+                            <!-- Hidden inputs will be added dynamically -->
+                        </form>
+
                         <div class="table-responsive">
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
+                                        <th width="50">
+                                            <input type="checkbox" id="selectAllCheckbox" title="Select All">
+                                        </th>
                                         <th>Title</th>
                                         <th>Client</th>
                                         <th>Budget</th>
@@ -67,6 +88,9 @@
                                 <tbody>
                                     {% for job in jobs %}
                                         <tr>
+                                            <td>
+                                                <input type="checkbox" class="job-checkbox" value="{{ job.id }}">
+                                            </td>
                                             <td>
                                                 <strong>{{ job.title }}</strong>
                                                 {% if job.skills %}
@@ -82,6 +106,10 @@
                                                     <i class="icon-eye"></i>
                                                     View
                                                 </a>
+                                                <button type="button" class="btn btn-sm btn-danger delete-job-btn" data-job-id="{{ job.id }}" data-job-title="{{ job.title }}">
+                                                    <i class="icon-trash"></i>
+                                                    Delete
+                                                </button>
                                             </td>
                                         </tr>
                                     {% endfor %}
@@ -94,4 +122,166 @@
         </div>
     </div>
 </div>
+
+<!-- Individual Delete Confirmation Modal -->
+<div class="modal fade" id="deleteJobModal" tabindex="-1" role="dialog" aria-labelledby="deleteJobModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteJobModalLabel">Confirm Job Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this job?</p>
+                <p><strong id="jobTitleToDelete"></strong></p>
+                <p class="text-danger"><i class="icon-alert-circle"></i> This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="icon-close"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteJob">
+                    <i class="icon-trash"></i> Delete Job
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Delete Confirmation Modal -->
+<div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkDeleteModalLabel">Confirm Bulk Job Deletion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="bulkDeleteCount"></strong> selected jobs?</p>
+                <p class="text-danger"><i class="icon-alert-circle"></i> This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="icon-close"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmBulkDelete">
+                    <i class="icon-trash"></i> Delete Jobs
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const jobCheckboxes = document.querySelectorAll('.job-checkbox');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    const deleteJobBtns = document.querySelectorAll('.delete-job-btn');
+    const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+    const deleteJobModal = document.getElementById('deleteJobModal');
+    const bulkDeleteModal = document.getElementById('bulkDeleteModal');
+
+    // Select All functionality
+    selectAllCheckbox.addEventListener('change', function() {
+        jobCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateBulkDeleteButton();
+    });
+
+    // Individual checkbox change
+    jobCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateBulkDeleteButton();
+            updateSelectAllCheckbox();
+        });
+    });
+
+    function updateBulkDeleteButton() {
+        const checkedBoxes = document.querySelectorAll('.job-checkbox:checked');
+        const count = checkedBoxes.length;
+        
+        selectedCountSpan.textContent = count;
+        bulkDeleteBtn.disabled = count === 0;
+    }
+
+    function updateSelectAllCheckbox() {
+        const totalCheckboxes = jobCheckboxes.length;
+        const checkedCheckboxes = document.querySelectorAll('.job-checkbox:checked').length;
+        
+        if (checkedCheckboxes === 0) {
+            selectAllCheckbox.indeterminate = false;
+            selectAllCheckbox.checked = false;
+        } else if (checkedCheckboxes === totalCheckboxes) {
+            selectAllCheckbox.indeterminate = false;
+            selectAllCheckbox.checked = true;
+        } else {
+            selectAllCheckbox.indeterminate = true;
+        }
+    }
+
+    // Bulk delete functionality
+    bulkDeleteBtn.addEventListener('click', function() {
+        const checkedBoxes = document.querySelectorAll('.job-checkbox:checked');
+        if (checkedBoxes.length === 0) {
+            alert('Please select at least one job to delete.');
+            return;
+        }
+        
+        document.getElementById('bulkDeleteCount').textContent = checkedBoxes.length;
+        $(bulkDeleteModal).modal('show');
+    });
+
+    document.getElementById('confirmBulkDelete').addEventListener('click', function() {
+        const checkedBoxes = document.querySelectorAll('.job-checkbox:checked');
+        const jobIds = Array.from(checkedBoxes).map(cb => cb.value);
+        
+        // Clear existing hidden inputs
+        bulkDeleteForm.innerHTML = '';
+        
+        // Add each job ID as a separate hidden input
+        jobIds.forEach(jobId => {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'job_ids[]';
+            hiddenInput.value = jobId;
+            bulkDeleteForm.appendChild(hiddenInput);
+        });
+        
+        // Submit the form
+        bulkDeleteForm.submit();
+    });
+
+    // Individual delete functionality
+    deleteJobBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const jobId = this.dataset.jobId;
+            const jobTitle = this.dataset.jobTitle;
+            
+            document.getElementById('jobTitleToDelete').textContent = jobTitle;
+            $(deleteJobModal).modal('show');
+            
+            // Store the job ID for the confirm button
+            deleteJobModal.dataset.jobId = jobId;
+        });
+    });
+
+    document.getElementById('confirmDeleteJob').addEventListener('click', function() {
+        const jobId = deleteJobModal.dataset.jobId;
+        
+        // Create a form and submit it
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/jobs/${jobId}/delete`;
+        document.body.appendChild(form);
+        form.submit();
+    });
+});
+</script>
 {% endblock %}
