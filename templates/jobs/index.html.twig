@@ -135,7 +135,7 @@
                                             <input type="checkbox" id="selectAllCheckbox" title="Select All">
                                         </th>
                                         <th>Title</th>
-                                        <th>Budget</th>
+                                        <th>Contract / Payment</th>
                                         <th>Country</th>
                                         <th>Posted</th>
                                         <th>Actions</th>
@@ -153,7 +153,26 @@
                                                     <br><small class="text-muted">{{ job.skills }}</small>
                                                 {% endif %}
                                             </td>
-                                            <td>{{ job.budget ?? 'Not specified' }}</td>
+                                            <td>
+                                                {% if job.contractType %}
+                                                    <span class="badge badge-info badge-sm">{{ job.contractType }}</span><br>
+                                                    {% if job.contractType == 'FIXED_PRICE' and job.fixedPriceAmount %}
+                                                        <strong class="text-success">${{ job.fixedPriceAmount|number_format(2, '.', ',') }}</strong>
+                                                    {% elseif job.contractType == 'HOURLY' %}
+                                                        {% if job.hourlyRateMin and job.hourlyRateMax %}
+                                                            <strong class="text-success">${{ job.hourlyRateMin|number_format(2, '.', ',') }}-${{ job.hourlyRateMax|number_format(2, '.', ',') }}/hr</strong>
+                                                        {% elseif job.hourlyRateMin %}
+                                                            <strong class="text-success">From ${{ job.hourlyRateMin|number_format(2, '.', ',') }}/hr</strong>
+                                                        {% elseif job.hourlyRateMax %}
+                                                            <strong class="text-success">Up to ${{ job.hourlyRateMax|number_format(2, '.', ',') }}/hr</strong>
+                                                        {% else %}
+                                                            <span class="text-muted">Rate not specified</span>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-muted">Not specified</span>
+                                                {% endif %}
+                                            </td>
                                             <td>
                                                 {% if job.client %}
                                                     {{ job.client.location }}
@@ -416,9 +435,30 @@ document.addEventListener('DOMContentLoaded', function() {
         let html = '';
         jobs.forEach(job => {
             const createdAt = job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'N/A';
-            const budget = job.budget || 'Not specified';
             const location = job.client ? job.client.location : 'Unknown';
-            const skills = job.skills || 'N/A';
+            
+            // Format contract/payment information
+            let contractInfo = '<span class="text-muted">Not specified</span>';
+            if (job.contractType) {
+                const contractTypeBadge = `<span class="badge badge-info badge-sm">${job.contractType}</span>`;
+                let paymentInfo = '';
+                
+                if (job.contractType === 'FIXED_PRICE' && job.fixedPriceAmount) {
+                    paymentInfo = `<br><strong class="text-success">$${parseFloat(job.fixedPriceAmount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</strong>`;
+                } else if (job.contractType === 'HOURLY') {
+                    if (job.hourlyRateMin && job.hourlyRateMax) {
+                        paymentInfo = `<br><strong class="text-success">$${parseFloat(job.hourlyRateMin).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}-$${parseFloat(job.hourlyRateMax).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}/hr</strong>`;
+                    } else if (job.hourlyRateMin) {
+                        paymentInfo = `<br><strong class="text-success">From $${parseFloat(job.hourlyRateMin).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}/hr</strong>`;
+                    } else if (job.hourlyRateMax) {
+                        paymentInfo = `<br><strong class="text-success">Up to $${parseFloat(job.hourlyRateMax).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}/hr</strong>`;
+                    } else {
+                        paymentInfo = '<br><span class="text-muted">Rate not specified</span>';
+                    }
+                }
+                
+                contractInfo = contractTypeBadge + paymentInfo;
+            }
             
             html += `
                 <tr>
@@ -430,7 +470,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ${job.title}
                         </a>
                     </td>
-                    <td>${budget}</td>
+                    <td>${contractInfo}</td>
                     <td>${location}</td>
                     <td>${createdAt}</td>
                     <td>

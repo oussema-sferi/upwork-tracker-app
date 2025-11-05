@@ -31,9 +31,17 @@ class Job
     #[ORM\Column]
     private ?\DateTimeImmutable $postedAt = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $budget = null;
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $contractType = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $fixedPriceAmount = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $hourlyRateMin = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $hourlyRateMax = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $country = null;
@@ -159,18 +167,6 @@ class Job
         return $this;
     }
 
-    public function getBudget(): ?string
-    {
-        return $this->budget;
-    }
-
-    public function setBudget(?string $budget): static
-    {
-        $this->budget = $budget;
-        return $this;
-    }
-
-
     public function getCountry(): ?string
     {
         return $this->country;
@@ -223,6 +219,50 @@ class Job
     public function setClient(?Client $client): static
     {
         $this->client = $client;
+        return $this;
+    }
+
+    public function getContractType(): ?string
+    {
+        return $this->contractType;
+    }
+
+    public function setContractType(?string $contractType): static
+    {
+        $this->contractType = $contractType;
+        return $this;
+    }
+
+    public function getFixedPriceAmount(): ?string
+    {
+        return $this->fixedPriceAmount;
+    }
+
+    public function setFixedPriceAmount(?string $fixedPriceAmount): static
+    {
+        $this->fixedPriceAmount = $fixedPriceAmount;
+        return $this;
+    }
+
+    public function getHourlyRateMin(): ?string
+    {
+        return $this->hourlyRateMin;
+    }
+
+    public function setHourlyRateMin(?string $hourlyRateMin): static
+    {
+        $this->hourlyRateMin = $hourlyRateMin;
+        return $this;
+    }
+
+    public function getHourlyRateMax(): ?string
+    {
+        return $this->hourlyRateMax;
+    }
+
+    public function setHourlyRateMax(?string $hourlyRateMax): static
+    {
+        $this->hourlyRateMax = $hourlyRateMax;
         return $this;
     }
 }

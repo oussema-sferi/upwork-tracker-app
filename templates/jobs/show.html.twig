@@ -45,8 +45,27 @@
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <strong>Budget:</strong><br>
-                                        {{ job.budget ?? 'Not specified' }}
+                                        <strong>Contract Type:</strong><br>
+                                        {% if job.contractType %}
+                                            <span class="badge badge-info">{{ job.contractType }}</span>
+                                            {% if job.contractType == 'FIXED_PRICE' and job.fixedPriceAmount %}
+                                                <br><span class="text-success">${{ job.fixedPriceAmount|number_format(2, '.', ',') }}</span>
+                                            {% elseif job.contractType == 'HOURLY' %}
+                                                <br><span class="text-success">
+                                                    {% if job.hourlyRateMin and job.hourlyRateMax %}
+                                                        ${{ job.hourlyRateMin|number_format(2, '.', ',') }} - ${{ job.hourlyRateMax|number_format(2, '.', ',') }}/hr
+                                                    {% elseif job.hourlyRateMin %}
+                                                        From ${{ job.hourlyRateMin|number_format(2, '.', ',') }}/hr
+                                                    {% elseif job.hourlyRateMax %}
+                                                        Up to ${{ job.hourlyRateMax|number_format(2, '.', ',') }}/hr
+                                                    {% else %}
+                                                        Rate not specified
+                                                    {% endif %}
+                                                </span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">Not specified</span>
+                                        {% endif %}
                                     </div>
                                     
                                     <div class="mb-3">

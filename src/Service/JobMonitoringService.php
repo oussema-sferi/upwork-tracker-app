@@ -172,9 +172,14 @@ class JobMonitoringService
             $job->setDescription($jobData['description']);
             $job->setUrl($jobData['url']);
             $job->setPostedAt(new \DateTimeImmutable($jobData['postedAt']));
-            $job->setBudget($jobData['budget'] ?? null);
             $job->setSkills($jobData['skills'] ?? null);
             $job->setUser($user);
+
+            // Set contract terms
+            $job->setContractType($jobData['contractType'] ?? null);
+            $job->setFixedPriceAmount($jobData['fixedPriceAmount'] ?? null);
+            $job->setHourlyRateMin($jobData['hourlyRateMin'] ?? null);
+            $job->setHourlyRateMax($jobData['hourlyRateMax'] ?? null);
 
             // Handle client creation
             if (isset($jobData['client']) && is_array($jobData['client'])) {

@@ -118,7 +118,10 @@ class JobController extends AbstractController
                         'id' => $job->getId(),
                         'title' => $job->getTitle(),
                         'description' => $job->getDescription(),
-                        'budget' => $job->getBudget(),
+                        'contractType' => $job->getContractType(),
+                        'fixedPriceAmount' => $job->getFixedPriceAmount(),
+                        'hourlyRateMin' => $job->getHourlyRateMin(),
+                        'hourlyRateMax' => $job->getHourlyRateMax(),
                         'client' => $job->getClient() ? [
                             'location' => $job->getClient()->getLocation(),
                             'isVerified' => $job->getClient()->isVerified(),
