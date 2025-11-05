@@ -18,7 +18,8 @@ class JobMonitoringService
         private readonly EntityManagerInterface $entityManager,
         private readonly JobRepository $jobRepository,
         private readonly SettingsRepository $settingsRepository,
-        private readonly ClientRepository $clientRepository
+        private readonly ClientRepository $clientRepository,
+        private readonly ?OpenAiService $openAiService = null
     ) {
     }
 
@@ -187,6 +188,19 @@ class JobMonitoringService
                 $job->setClient($client);
             }
 
+            // Generate proposal if job is hourly and min rate >= $18
+            if ($this->shouldGenerateProposal($job)) {
+                //dd($job);
+                error_log('Generating proposal for job: ' . $job->getTitle());
+                $proposal = $this->generateProposalForJob($job);
+                if ($proposal) {
+                    $job->setSuggestedProposal($proposal);
+                    error_log('Proposal generated successfully');
+                } else {
+                    error_log('Failed to generate proposal');
+                }
+            }
+
             $this->entityManager->persist($job);
             $this->entityManager->flush();
 
@@ -220,6 +234,43 @@ class JobMonitoringService
         $this->entityManager->flush();
 
         return $client;
+    }
+
+    private function shouldGenerateProposal(Job $job): bool
+    {
+        // Check if job is hourly and OpenAI service is available
+        if (!$this->openAiService) {
+            return false;
+        }
+        
+        // Check if job is hourly type
+        if ($job->getContractType() !== 'HOURLY') {
+            return false;
+        }
+        
+        // Check if minimum hourly rate is >= $18
+        $hourlyRateMin = $job->getHourlyRateMin();
+        if ($hourlyRateMin === null || (float)$hourlyRateMin < 11.0) {
+            return false;
+        }
+        return true;
+    }
+
+    private function generateProposalForJob(Job $job): ?string
+    {
+        if (!$this->openAiService) {
+            return null;
+        }
+
+        try {
+            return $this->openAiService->generateProposal(
+                $job->getTitle(),
+                $job->getDescription()
+            );
+        } catch (\Exception $e) {
+            error_log('Error generating proposal: ' . $e->getMessage());
+            return null;
+        }
     }
 
     public function getJobsForUser(User $user, int $limit = 50): array

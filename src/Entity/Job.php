@@ -49,6 +49,9 @@ class Job
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $skills = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $suggestedProposal = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -263,6 +266,17 @@ class Job
     public function setHourlyRateMax(?string $hourlyRateMax): static
     {
         $this->hourlyRateMax = $hourlyRateMax;
+        return $this;
+    }
+
+    public function getSuggestedProposal(): ?string
+    {
+        return $this->suggestedProposal;
+    }
+
+    public function setSuggestedProposal(?string $suggestedProposal): static
+    {
+        $this->suggestedProposal = $suggestedProposal;
         return $this;
     }
 }
