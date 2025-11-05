@@ -125,46 +125,83 @@ class UpworkApiService
     public function searchJobs(string $accessToken, string $keyword): array
     {
         error_log('Searching jobs for keyword: ' . $keyword);
+        /*$testQuery = 'query IntrospectContractTerms {
+  __type(name: "MarketplaceContractTerms") {
+    name
+    description
+    fields {
+      name
+      description
+      type {
+        kind
+        name
+        ofType { kind name }
+      }
+    }
+  }
+}
+
+
+';*/
         
+$query = '
+  query {
+    marketplaceJobPostings(
+      marketPlaceJobFilter: { 
+        searchExpression_eq: "' . addslashes($keyword) . '" 
+      },
+      searchType: USER_JOBS_SEARCH,
+      sortAttributes: { field: RECENCY }
+    ) {
+      edges {
+        node {
+          id
+          title
+          description
+          createdDateTime
+
+          # get the full job entity, then its contractTerms
+          job {
+            id
+            contractTerms {
+              contractType
+              fixedPriceContractTerms {
+                amount { rawValue currency displayValue }
+                maxAmount { rawValue currency displayValue }
+              }
+              hourlyContractTerms {
+                hourlyBudgetType
+                hourlyBudgetMin
+                hourlyBudgetMax
+              }
+            }
+          }
+
+          client {
+            location {
+              country
+              state
+              city
+            }
+            totalHires
+            verificationStatus
+          }
+
+          skills { name }
+        }
+      }
+    }
+  }
+';
+
+
         $response = $this->httpClient->request('POST', 'https://api.upwork.com/graphql', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $accessToken,
                 'Content-Type' => 'application/json',
             ],
             'json' => [
-                'query' => '
-                  query {
-                    marketplaceJobPostings(
-                      marketPlaceJobFilter: { 
-                        searchExpression_eq: "' . $keyword . '" 
-                      },
-                      searchType: USER_JOBS_SEARCH,
-                      sortAttributes: { field: RECENCY }
-                    ) {
-                      edges {
-                        node {
-                          id
-                          title
-                          description
-                          createdDateTime
-                        client {
-                            location {
-                            country
-                            state
-                            city
-                            }
-                            
-                    totalHires
-                    verificationStatus
-                        }
-                          skills {
-                            name
-                          }
-                        }
-                      }
-                    }
-                  }
-                '
+                'query' => $query
             ]
         ]);
 
@@ -172,6 +209,7 @@ class UpworkApiService
         error_log('Job search API response status: ' . $statusCode);
         
         $data = $response->toArray();
+        //dd($data);
         error_log('Job search response: ' . json_encode($data));
         
         if ($statusCode !== 200) {
@@ -187,6 +225,7 @@ class UpworkApiService
             foreach ($data['data']['marketplaceJobPostings']['edges'] as $edge) {
                 $node = $edge['node'];
                 error_log('Processing job node: ' . json_encode($node));
+                
                 // Extract client information
                 $clientData = null;
                 if (isset($node['client']['location'])) {
@@ -198,13 +237,38 @@ class UpworkApiService
                     ];
                 }
                 
+                // Extract contract terms
+                $contractType = null;
+                $fixedPriceAmount = null;
+                $hourlyRateMin = null;
+                $hourlyRateMax = null;
+                
+                if (isset($node['job']['contractTerms'])) {
+                    $contractTerms = $node['job']['contractTerms'];
+                    $contractType = $contractTerms['contractType'] ?? null;
+                    
+                    if ($contractType === 'FIXED_PRICE' && isset($contractTerms['fixedPriceContractTerms'])) {
+                        $fixedPrice = $contractTerms['fixedPriceContractTerms'];
+                        if (isset($fixedPrice['amount']['rawValue'])) {
+                            $fixedPriceAmount = $fixedPrice['amount']['rawValue'];
+                        }
+                    } elseif ($contractType === 'HOURLY' && isset($contractTerms['hourlyContractTerms'])) {
+                        $hourly = $contractTerms['hourlyContractTerms'];
+                        $hourlyRateMin = $hourly['hourlyBudgetMin'] ?? null;
+                        $hourlyRateMax = $hourly['hourlyBudgetMax'] ?? null;
+                    }
+                }
+                
                 $jobs[] = [
                     'id' => $node['id'],
                     'title' => $node['title'],
                     'description' => $node['description'],
                     'postedAt' => $node['createdDateTime'],
                     'url' => 'https://www.upwork.com/jobs/~02' . $node['id'], // Construct URL with ~02 prefix
-                    'budget' => 'Not specified', // Not available in this schema
+                    'contractType' => $contractType,
+                    'fixedPriceAmount' => $fixedPriceAmount,
+                    'hourlyRateMin' => $hourlyRateMin,
+                    'hourlyRateMax' => $hourlyRateMax,
                     'client' => $clientData,
                     'skills' => implode(', ', array_column($node['skills'], 'name')),
                     'proposals' => 0 // Not available in this schema
