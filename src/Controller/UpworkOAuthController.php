@@ -109,7 +109,7 @@ class UpworkOAuthController extends AbstractController
         }
 
         try {
-            $result = $this->upworkApiService->fetchUserProfile($user->getUpworkAccessToken());
+            $result = $this->upworkApiService->testApiConnection($user->getUpworkAccessToken());
             
             $this->addFlash('success', 'API test successful! Upwork API connection is working. You can now fetch jobs and other data from Upwork.');
         } catch (\Exception $e) {

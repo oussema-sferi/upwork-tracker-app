@@ -24,6 +24,27 @@
                                     {{ job.description|nl2br }}
                                 </div>
                             </div>
+                            
+                            {% if job.suggestedProposal %}
+                                <div class="mb-4">
+                                    <h6>
+                                        <i class="icon-document"></i>
+                                        Suggested Proposal
+                                        <span class="badge badge-success ml-2">AI Generated</span>
+                                    </h6>
+                                    <div class="border p-3 rounded bg-light" style="max-height: 400px; overflow-y: auto;">
+                                        <div class="mb-2">
+                                            <small class="text-muted">
+                                                <i class="icon-info"></i>
+                                                This proposal was automatically generated for hourly jobs with a minimum rate of $18/hr or higher.
+                                            </small>
+                                        </div>
+                                        <div class="proposal-content">
+                                            {{ job.suggestedProposal|nl2br }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="col-md-4">
                             <div class="card">

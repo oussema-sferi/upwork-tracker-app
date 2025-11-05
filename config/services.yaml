@@ -29,6 +29,10 @@ services:
             $upworkApiSecret: '%env(UPWORK_API_SECRET)%'
             $upworkCallbackUrl: '%env(UPWORK_CALLBACK_URL)%'
     
+    App\Service\OpenAiService:
+        arguments:
+            $openAiApiKey: '%env(OPENAI_SECRET_KEY)%'
+    
     App\Controller\ProfileController:
         arguments:
             $profilePicturesDirectory: '%kernel.project_dir%/public/uploads/profile_pictures'

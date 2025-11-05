@@ -13,6 +13,7 @@ services:
       - UPWORK_API_KEY=${UPWORK_API_KEY}
       - UPWORK_API_SECRET=${UPWORK_API_SECRET}
       - UPWORK_CALLBACK_URL=${UPWORK_CALLBACK_URL}
+      - OPENAI_SECRET_KEY=${OPENAI_SECRET_KEY}
     depends_on:
       - mysql
 

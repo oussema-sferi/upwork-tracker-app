@@ -69,7 +69,7 @@ class UpworkApiService
         return $data['access_token'];
     }
 
-    public function fetchUserProfile(string $accessToken): array
+    public function testApiConnection(string $accessToken): array
     {
         error_log('Testing Upwork GraphQL API with token: ' . substr($accessToken, 0, 20) . '...');
         
