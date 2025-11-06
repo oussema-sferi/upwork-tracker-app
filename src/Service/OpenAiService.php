@@ -19,19 +19,13 @@ class OpenAiService
     public function generateProposal(string $jobTitle, string $jobDescription): ?string
     {
         try {
-            $prompt = "You are a professional freelancer applying for an Upwork job. Generate a compelling, personalized proposal for the following job posting.\n\n";
-            $prompt .= "Job Title: {$jobTitle}\n\n";
+            $prompt = "Job Title: {$jobTitle}\n\n";
             $prompt .= "Job Description:\n{$jobDescription}\n\n";
-            $prompt .= "Please write a VERY SHORT, modern proposal (not classic/traditional style) that:\n";
-            $prompt .= "1. Starts with TWO very attractive, attention-grabbing opening lines that stand out and are NOT classic or generic\n";
-            $prompt .= "2. Shows genuine interest in the project\n";
-            $prompt .= "3. Briefly highlights relevant experience\n";
-            $prompt .= "4. Addresses the client's specific needs\n";
-            $prompt .= "5. The ENTIRE proposal must be ONLY 3-4 lines total (not paragraphs, just lines)\n";
-            $prompt .= "6. Avoid classic phrases like 'Dear Sir/Madam', 'I am writing to', 'I would like to apply'\n";
-            $prompt .= "7. Do NOT use emojis, icons, or symbols (like 🚀, ✅, ⭐, etc.) - use only plain text\n";
-            $prompt .= "8. The proposal must sound natural and human-written, NOT AI-generated - avoid overly formal or robotic language\n";
-            $prompt .= "Write in a fresh, modern, and engaging tone that grabs attention from the first line. Keep it extremely concise - maximum 4 lines total. Use only plain text, no emojis or symbols. Make it sound genuinely human-written, not like it came from an AI.";
+            $prompt .= "Write a 3–4 line Upwork proposal following these instructions. 
+            Start directly with something that grabs attention — a quick insight, idea, or confident statement relevant to the job. 
+            Avoid greetings, self-introductions, or mentioning years of experience. 
+            Make it sound natural, focused, and helpful. 
+            End with a short call to action (e.g., suggesting next step or expressing enthusiasm).";
 
             $response = $this->httpClient->request('POST', 'https://api.openai.com/v1/chat/completions', [
                 'headers' => [
@@ -43,7 +37,12 @@ class OpenAiService
                     'messages' => [
                         [
                             'role' => 'system',
-                            'content' => 'You are a professional freelancer writing modern, attention-grabbing job proposals for Upwork. Write extremely short proposals (3-4 lines total, not paragraphs) that start with two very attractive opening lines that stand out. Avoid classic/traditional phrases, generic openings, and never use emojis or icons - use only plain text. Write in a natural, human tone that does not sound AI-generated.'
+                            'content' => "You are Oussema, a full-stack PHP and Symfony developer who writes short, modern Upwork proposals that sound human and confident — never generic or formal. 
+                        You do NOT start with greetings like 'Hi there' or mention years of experience. 
+                        You begin with a sharp, engaging line that connects directly to the client’s project or problem. 
+                        You focus on ideas, outcomes, and collaboration, not biography. 
+                        Write 3–4 concise lines in plain text (no emojis, no bullet points). 
+                        Tone: professional, friendly, confident, creative, and solution-oriented."
                         ],
                         [
                             'role' => 'user',
@@ -51,7 +50,7 @@ class OpenAiService
                         ]
                     ],
                     'temperature' => 0.7,
-                    'max_tokens' => 150,
+                    'max_tokens' => 130,
                 ],
             ]);
 
