@@ -2,10 +2,12 @@
 
 namespace App\Service;
 
+use App\Entity\Alert;
 use App\Entity\Client;
 use App\Entity\Job;
 use App\Entity\Settings;
 use App\Entity\User;
+use App\Repository\AlertRepository;
 use App\Repository\ClientRepository;
 use App\Repository\JobRepository;
 use App\Repository\SettingsRepository;
@@ -19,6 +21,7 @@ class JobMonitoringService
         private readonly JobRepository $jobRepository,
         private readonly SettingsRepository $settingsRepository,
         private readonly ClientRepository $clientRepository,
+        private readonly AlertRepository $alertRepository,
         private readonly ?OpenAiService $openAiService = null,
         private readonly ?TelegramService $telegramService = null
     ) {
@@ -345,7 +348,20 @@ class JobMonitoringService
             if ($job->getSuggestedProposal()) {
                 $message = $this->formatTelegramMessage($job);
                 if ($message) {
-                    $this->telegramService->sendMessage($message);
+                    $sent = $this->telegramService->sendMessage($message);
+                    
+                    // Save alert to database
+                    $alert = new Alert();
+                    $alert->setJob($job);
+                    $alert->setType('TELEGRAM');
+                    $alert->setIsSent($sent);
+                    if ($sent) {
+                        $alert->setSentAt(new \DateTimeImmutable());
+                    }
+                    
+                    $this->entityManager->persist($alert);
+                    $this->entityManager->flush();
+                    
                     // Small delay to avoid rate limiting
                     usleep(500000); // 0.5 seconds
                 }
