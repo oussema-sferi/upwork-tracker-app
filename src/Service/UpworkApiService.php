@@ -247,10 +247,25 @@ $query = '
                     $contractTerms = $node['job']['contractTerms'];
                     $contractType = $contractTerms['contractType'] ?? null;
                     
+                    // Normalize contract type: API returns "FIXED" but we use "FIXED_PRICE" in our system
+                    if ($contractType === 'FIXED') {
+                        $contractType = 'FIXED_PRICE';
+                    }
+                    
                     if ($contractType === 'FIXED_PRICE' && isset($contractTerms['fixedPriceContractTerms'])) {
                         $fixedPrice = $contractTerms['fixedPriceContractTerms'];
+                        
+                        // Try to get amount from rawValue first, then displayValue, then maxAmount
                         if (isset($fixedPrice['amount']['rawValue'])) {
                             $fixedPriceAmount = $fixedPrice['amount']['rawValue'];
+                        } elseif (isset($fixedPrice['amount']['displayValue'])) {
+                            // Extract numeric value from displayValue (e.g., "$500" -> "500")
+                            $fixedPriceAmount = preg_replace('/[^0-9.]/', '', $fixedPrice['amount']['displayValue']);
+                        } elseif (isset($fixedPrice['maxAmount']['rawValue'])) {
+                            $fixedPriceAmount = $fixedPrice['maxAmount']['rawValue'];
+                        } elseif (isset($fixedPrice['maxAmount']['displayValue'])) {
+                            // Extract numeric value from displayValue
+                            $fixedPriceAmount = preg_replace('/[^0-9.]/', '', $fixedPrice['maxAmount']['displayValue']);
                         }
                     } elseif ($contractType === 'HOURLY' && isset($contractTerms['hourlyContractTerms'])) {
                         $hourly = $contractTerms['hourlyContractTerms'];

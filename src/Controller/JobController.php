@@ -129,6 +129,7 @@ class JobController extends AbstractController
                         'skills' => $job->getSkills(),
                         'createdAt' => $job->getCreatedAt() ? $job->getCreatedAt()->format('Y-m-d H:i:s') : null,
                         'url' => $job->getUrl(),
+                        'suggestedProposal' => $job->getSuggestedProposal(),
                     ];
                 }, $paginationData['jobs']),
                 'pagination' => $paginationData['pagination'],

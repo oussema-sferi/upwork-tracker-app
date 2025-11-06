@@ -187,14 +187,37 @@
                                             </td>
                                             <td>{{ job.postedAt|date('M d, Y') }}</td>
                                             <td>
-                                                <a href="{{ path('app_jobs_show', {'id': job.id}) }}" class="btn btn-sm btn-info">
-                                                    <i class="icon-eye"></i>
-                                                    View
-                                                </a>
-                                                <button type="button" class="btn btn-sm btn-danger delete-job-btn" data-job-id="{{ job.id }}" data-job-title="{{ job.title }}">
+                                                <div class="d-flex align-items-center" style="gap: 4px;">
+                                                    <a href="{{ path('app_jobs_show', {'id': job.id}) }}" 
+                                                       class="btn btn-sm btn-info" 
+                                                       title="View job details"
+                                                       style="min-width: 36px;">
+                                                        <i class="icon-eye"></i>
+                                                    </a>
+                                                    {% if job.suggestedProposal %}
+                                                        <button type="button" 
+                                                                class="btn btn-sm view-proposal-btn" 
+                                                                data-job-id="{{ job.id }}"
+                                                                data-job-title="{{ job.title }}"
+                                                                data-proposal="{{ job.suggestedProposal|e('html_attr') }}"
+                                                                title="View AI-generated proposal"
+                                                                style="min-width: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);">
+                                                            <i class="fa fa-lightbulb-o"></i>
+                                                        </button>
+                                                    {% else %}
+                                                        <button type="button" 
+                                                                class="btn btn-sm btn-outline-secondary view-proposal-btn" 
+                                                                disabled
+                                                                title="No proposal generated yet"
+                                                                style="min-width: 36px; opacity: 0.4; cursor: not-allowed;">
+                                                            <i class="fa fa-lightbulb-o"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                </div>
+                                                {# <button type="button" class="btn btn-sm btn-danger delete-job-btn" data-job-id="{{ job.id }}" data-job-title="{{ job.title }}">
                                                     <i class="icon-trash"></i>
                                                     Delete
-                                                </button>
+                                                </button> #}
                                             </td>
                                         </tr>
                                     {% endfor %}
@@ -334,6 +357,45 @@
     </div>
 </div>
 
+<!-- Proposal View Modal -->
+<div class="modal fade" id="proposalModal" tabindex="-1" role="dialog" aria-labelledby="proposalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="proposalModalLabel">
+                    <i class="icon-document"></i> AI Generated Proposal
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h6 class="text-muted">Job Title:</h6>
+                    <p class="font-weight-bold" id="proposalJobTitle"></p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-muted">Suggested Proposal:</h6>
+                    <div class="card bg-light p-4">
+                        <p class="mb-0" id="proposalContent" style="white-space: pre-wrap; line-height: 1.8;"></p>
+                    </div>
+                </div>
+                <div class="alert alert-info mb-0">
+                    <i class="icon-info"></i> <small>This proposal was generated by AI based on the job requirements.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="icon-close"></i> Close
+                </button>
+                <button type="button" class="btn btn-primary" id="copyProposalBtn">
+                    <i class="icon-copy"></i> Copy Proposal
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const jobCheckboxes = document.querySelectorAll('.job-checkbox');
@@ -412,6 +474,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    function escapeHtmlAttr(text) {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\n/g, '__NEWLINE__'); // Temporary placeholder for newlines
+    }
+    
     function updateJobsTable(jobs) {
         console.log('Updating jobs table with:', jobs);
         console.log('jobsTableBody element:', jobsTableBody);
@@ -474,9 +547,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${location}</td>
                     <td>${createdAt}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-danger delete-job-btn" data-job-id="${job.id}">
-                            <i class="fa fa-trash"></i>
-                        </button>
+                        <div class="d-flex align-items-center" style="gap: 4px;">
+                            <a href="/jobs/${job.id}" class="btn btn-sm btn-info" title="View job details" style="min-width: 36px;">
+                                <i class="icon-eye"></i>
+                            </a>
+                            ${job.suggestedProposal ? 
+                                `<button type="button" class="btn btn-sm view-proposal-btn" data-job-id="${job.id}" data-job-title="${escapeHtmlAttr(job.title)}" data-proposal="${escapeHtmlAttr(job.suggestedProposal)}" title="View AI-generated proposal" style="min-width: 36px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);">
+                                    <i class="fa fa-lightbulb-o"></i>
+                                </button>` :
+                                `<button type="button" class="btn btn-sm btn-outline-secondary view-proposal-btn" disabled title="No proposal generated yet" style="min-width: 36px; opacity: 0.4; cursor: not-allowed;">
+                                    <i class="fa fa-lightbulb-o"></i>
+                                </button>`
+                            }
+                        </div>
                     </td>
                 </tr>
             `;
@@ -619,6 +702,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const bulkDeleteForm = document.getElementById('bulkDeleteForm');
     const deleteJobModal = document.getElementById('deleteJobModal');
     const bulkDeleteModal = document.getElementById('bulkDeleteModal');
+    const proposalModal = document.getElementById('proposalModal');
+    const proposalJobTitle = document.getElementById('proposalJobTitle');
+    const proposalContent = document.getElementById('proposalContent');
+    const copyProposalBtn = document.getElementById('copyProposalBtn');
 
     // Select All functionality
     selectAllCheckbox.addEventListener('change', function() {
@@ -714,6 +801,48 @@ document.addEventListener('DOMContentLoaded', function() {
         form.action = `/jobs/${jobId}/delete`;
         document.body.appendChild(form);
         form.submit();
+    });
+
+    // Proposal view functionality
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.view-proposal-btn:not(:disabled)')) {
+            const btn = e.target.closest('.view-proposal-btn');
+            const jobTitle = btn.dataset.jobTitle || 'Job';
+            let proposal = btn.dataset.proposal || '';
+            
+            // Restore newlines from placeholder
+            proposal = proposal.replace(/__NEWLINE__/g, '\n');
+            
+            proposalJobTitle.textContent = jobTitle;
+            proposalContent.textContent = proposal;
+            
+            // Store proposal for copy functionality (with actual newlines)
+            proposalModal.dataset.proposal = proposal;
+            
+            $(proposalModal).modal('show');
+        }
+    });
+
+    // Copy proposal functionality
+    copyProposalBtn.addEventListener('click', function() {
+        const proposal = proposalModal.dataset.proposal || '';
+        if (proposal) {
+            navigator.clipboard.writeText(proposal).then(function() {
+                const originalText = copyProposalBtn.innerHTML;
+                copyProposalBtn.innerHTML = '<i class="icon-check"></i> Copied!';
+                copyProposalBtn.classList.add('btn-success');
+                copyProposalBtn.classList.remove('btn-primary');
+                
+                setTimeout(function() {
+                    copyProposalBtn.innerHTML = originalText;
+                    copyProposalBtn.classList.remove('btn-success');
+                    copyProposalBtn.classList.add('btn-primary');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Failed to copy proposal:', err);
+                alert('Failed to copy proposal. Please select and copy manually.');
+            });
+        }
     });
 });
 </script>
