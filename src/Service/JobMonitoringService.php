@@ -19,7 +19,8 @@ class JobMonitoringService
         private readonly JobRepository $jobRepository,
         private readonly SettingsRepository $settingsRepository,
         private readonly ClientRepository $clientRepository,
-        private readonly ?OpenAiService $openAiService = null
+        private readonly ?OpenAiService $openAiService = null,
+        private readonly ?TelegramService $telegramService = null
     ) {
     }
 
@@ -71,6 +72,12 @@ class JobMonitoringService
 
         error_log('Jobs filtered out: ' . $filteredCount);
         error_log('Jobs saved: ' . count($savedJobs));
+        
+        // Send Telegram notifications for jobs with proposals
+        if ($this->telegramService) {
+            $this->sendTelegramNotifications($savedJobs);
+        }
+        
         error_log('=== JOB MONITORING DEBUG END ===');
 
         return $savedJobs;
@@ -330,5 +337,93 @@ class JobMonitoringService
                 'next_page' => $page < $totalPages ? $page + 1 : null,
             ]
         ];
+    }
+
+    private function sendTelegramNotifications(array $jobs): void
+    {
+        foreach ($jobs as $job) {
+            if ($job->getSuggestedProposal()) {
+                $message = $this->formatTelegramMessage($job);
+                if ($message) {
+                    $this->telegramService->sendMessage($message);
+                    // Small delay to avoid rate limiting
+                    usleep(500000); // 0.5 seconds
+                }
+            }
+        }
+    }
+
+    private function formatTelegramMessage(Job $job): ?string
+    {
+        try {
+            // Build message parts without description first
+            $messageParts = [
+                "<b>🎯 New Job Opportunity</b>\n\n",
+                "<b>📋 Title:</b>\n" . htmlspecialchars($job->getTitle()) . "\n\n",
+            ];
+            
+            // Contract Type and Payment
+            $paymentText = "<b>💰 Payment:</b>\n";
+            if ($job->getContractType() === 'FIXED_PRICE') {
+                $amount = $job->getFixedPriceAmount();
+                if ($amount) {
+                    $paymentText .= "Fixed Price: $" . number_format((float)$amount, 2) . "\n";
+                } else {
+                    $paymentText .= "Fixed Price: Not specified\n";
+                }
+            } elseif ($job->getContractType() === 'HOURLY') {
+                $min = $job->getHourlyRateMin();
+                $max = $job->getHourlyRateMax();
+                if ($min && $max) {
+                    $paymentText .= "Hourly: $" . number_format((float)$min, 2) . " - $" . number_format((float)$max, 2) . "/hr\n";
+                } elseif ($min) {
+                    $paymentText .= "Hourly: From $" . number_format((float)$min, 2) . "/hr\n";
+                } elseif ($max) {
+                    $paymentText .= "Hourly: Up to $" . number_format((float)$max, 2) . "/hr\n";
+                } else {
+                    $paymentText .= "Hourly: Rate not specified\n";
+                }
+            } else {
+                $paymentText .= "Not specified\n";
+            }
+            $messageParts[] = $paymentText . "\n";
+            
+            // Client Location and Verification
+            if ($job->getClient()) {
+                $client = $job->getClient();
+                $locationText = "<b>📍 Location:</b>\n" . htmlspecialchars($client->getLocation()) . "\n";
+                if ($client->isVerified()) {
+                    $locationText .= "✅ <b>Verified Client</b>\n";
+                }
+                $messageParts[] = $locationText . "\n";
+            }
+            
+            // Job Link
+            $messageParts[] = "<b>🔗 Job Link:</b>\n<a href=\"" . htmlspecialchars($job->getUrl()) . "\">View on Upwork</a>\n\n";
+            
+            // Suggested Proposal
+            $messageParts[] = "<b>💡 AI-Generated Proposal:</b>\n<i>" . htmlspecialchars($job->getSuggestedProposal()) . "</i>\n";
+            
+            // Calculate available space for description
+            $baseMessageLength = mb_strlen(implode('', $messageParts));
+            $descriptionHeader = "<b>📝 Description:</b>\n";
+            $maxDescriptionLength = 4096 - $baseMessageLength - mb_strlen($descriptionHeader) - 100; // 100 chars buffer
+            
+            // Truncate description if needed
+            $description = $job->getDescription();
+            if (mb_strlen($description) > $maxDescriptionLength) {
+                $description = mb_substr($description, 0, $maxDescriptionLength) . '...';
+            }
+            
+            // Build final message with description inserted
+            $message = $messageParts[0] . $messageParts[1]; // Header + Title
+            $message .= $descriptionHeader . htmlspecialchars($description) . "\n\n"; // Description
+            $message .= implode('', array_slice($messageParts, 2)); // Rest of the parts
+            
+            return $message;
+        } catch (\Exception $e) {
+            error_log('Error formatting Telegram message: ' . $e->getMessage());
+            return null;
+        }
     }
 }

@@ -33,6 +33,11 @@ services:
         arguments:
             $openAiApiKey: '%env(OPENAI_SECRET_KEY)%'
     
+    App\Service\TelegramService:
+        arguments:
+            $telegramBotToken: '%env(TELEGRAM_BOT_TOKEN)%'
+            $telegramChatId: '%env(TELEGRAM_DEFAULT_CHAT_ID)%'
+    
     App\Controller\ProfileController:
         arguments:
             $profilePicturesDirectory: '%kernel.project_dir%/public/uploads/profile_pictures'
